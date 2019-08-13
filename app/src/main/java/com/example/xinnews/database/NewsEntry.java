@@ -41,16 +41,20 @@ public class NewsEntry {
     @ColumnInfo(name = "viewed")
     private boolean viewed;
 
-    NewsEntry(JSONObject news, boolean viewed, boolean loadImage, boolean loadVideo) throws JSONException {
+    @ColumnInfo(name = "favorite")
+    private boolean favorite;
+
+    NewsEntry(JSONObject news) throws JSONException {
         this.newsId = news.getString("newsID");
         this.title = news.getString("title");
         this.content = news.getString("content");
         this.publishTime = news.getString("publishTime");
         this.keywords = news.getJSONArray("keywords").toString();
-        this.images = dataGenerate(news.getString("image"), loadImage);
-        this.videos = dataGenerate(news.getString("video"), loadVideo);
+        this.images = dataGenerate(news.getString("image"), true);
+        this.videos = dataGenerate(news.getString("video"), false);
         this.publisher = news.getString("publisher");
-        this.viewed = viewed;
+        this.viewed = false;
+        this.favorite = false;
     }
 
     private String loadData(String address) {

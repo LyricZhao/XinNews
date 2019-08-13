@@ -50,6 +50,7 @@
     - videos (in path list), 当进入页面时再加载
     - publisher
     - viewed
+    - favorite
  
 - CategoryEntry
     - name
