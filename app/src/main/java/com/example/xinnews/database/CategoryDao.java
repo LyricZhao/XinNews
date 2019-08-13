@@ -8,14 +8,14 @@ import androidx.room.Query;
 import java.util.List;
 
 @Dao
-public interface NewsDao {
+public interface CategoryDao {
 
     @Insert
-    void insert(NewsEntry news);
+    void insert(CategoryEntry category);
 
-    @Query("DELETE FROM news_table")
+    @Query("DELETE FROM categories_table")
     void deleteAll();
 
-    @Query("SELECT * from news_table")
-    LiveData<List<NewsEntry>> getAllNews();
+    @Query("SELECT * from categories_table")
+    LiveData<List<CategoryEntry>> getAllCategory();
 }

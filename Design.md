@@ -50,10 +50,9 @@
     - videos (in path list), 当进入页面时再加载
     - publisher
     - viewed
-    
+ 
 - CategoryEntry
-    - size
-    - startDate
-    - words
-    - categories
+    - name
+    - keyword
+    - category
     
