@@ -15,36 +15,38 @@ public class NewsEntry {
     @PrimaryKey
     @NonNull
     @ColumnInfo(name = "newsId")
-    private String newsId;
+    String newsId;
 
     @ColumnInfo(name = "title")
-    private String title;
+    String title;
 
     @ColumnInfo(name = "content")
-    private String content;
+    String content;
 
     @ColumnInfo(name = "category")
-    private String publishTime;
+    String publishTime;
 
     @ColumnInfo(name = "keywords")
-    private String keywords;
+    String keywords;
 
     @ColumnInfo(name = "images")
-    private String images;
+    String images;
 
     @ColumnInfo(name = "videos")
-    private String videos;
+    String videos;
 
     @ColumnInfo(name = "publisher")
-    private String publisher;
+    String publisher;
 
     @ColumnInfo(name = "viewed")
-    private boolean viewed;
+    boolean viewed;
 
     @ColumnInfo(name = "favorite")
-    private boolean favorite;
+    boolean favorite;
 
-    NewsEntry(JSONObject news) throws JSONException {
+    public NewsEntry() { }
+
+    public NewsEntry(@NonNull JSONObject news) throws JSONException {
         this.newsId = news.getString("newsID");
         this.title = news.getString("title");
         this.content = news.getString("content");
@@ -57,7 +59,7 @@ public class NewsEntry {
         this.favorite = false;
     }
 
-    private String loadData(String address) {
+    public String loadData(String address) {
         // TODO: download web data and store
         return address;
     }

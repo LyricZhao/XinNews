@@ -11,10 +11,7 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
-        <activity
-                android:name=".NewsPage"
-                android:label="@string/title_activity_news_page"
-                android:theme="@style/AppTheme.NoActionBar">
+        <activity android:name=".NewsPage">
         </activity>
         <activity
                 android:name=".MainActivity"
