@@ -21,7 +21,17 @@
     - 清新时报
     - \[ \] 写后台实现登录、注册
     
-    
+#### API    
+- API Example: https://api2.newsminer.net/svc/news/queryNewsList?size=15&startDate=2019-07-01&endDate=2019-07-03&words=特朗普&categories=科技
+- 测试连接: https://api2.newsminer.net/svc/news/queryNewsList
+- 参数
+    - size: 新闻篇数
+    - startDate: 开始时间
+    - endDate: 截止时间
+    - words: 关键词
+    - categories: 分类
+        - 可选项: 娱乐、军事、教育、文化、健康、财经、体育、汽车、科技、社会
+
 - 新闻信息
     - publishTime
     - keywords
@@ -40,6 +50,7 @@
         - who
         - where
         
+#### 数据库        
 - NewsEntry
     - newsId (@PrimaryKey)
     - title

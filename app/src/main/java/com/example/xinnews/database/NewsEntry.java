@@ -60,7 +60,7 @@ public class NewsEntry {
     }
 
     public String loadData(String address) {
-        // TODO: download web data and store
+        // TODO: download web data and store, here it's the image/video data
         return address;
     }
 
