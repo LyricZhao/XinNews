@@ -2,9 +2,11 @@
 
 buildscript {
     repositories {
-        google()
+//        google()
         jcenter()
-        
+        maven {
+            url "https://maven.aliyun.com/repository/google"
+        }
     }
     dependencies {
         // noinspection GradleDependency
@@ -17,8 +19,11 @@ buildscript {
 
 allprojects {
     repositories {
-        google()
+//        google()
         jcenter()
+        maven {
+            url "https://maven.aliyun.com/repository/google"
+        }
     }
 
     tasks.withType(JavaCompile) {

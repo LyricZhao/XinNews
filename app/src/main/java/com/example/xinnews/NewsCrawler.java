@@ -60,7 +60,7 @@ public class NewsCrawler {
         if (startDate != null) queryUrl.append("&startDate=").append(startDate);
         if (endDate != null) queryUrl.append("&endDate=").append(endDate);
         if (words != null) queryUrl.append("&words=").append(words);
-        if (categories != null) queryUrl.append("&categories").append(categories);
+        if (categories != null) queryUrl.append("&categories=").append(categories);
         String jsonContent = getUrlContent(queryUrl.toString());
         JSONObject globalContent = new JSONObject(jsonContent);
         return globalContent.getJSONArray("data");
@@ -69,8 +69,11 @@ public class NewsCrawler {
     public static ArrayList<NewsEntry> getNewsEntryArray(int size, String startDate, String endDate, String words, String categories) throws Exception {
         JSONArray jsonArray = getNewsJsonArray(size, startDate, endDate, words, categories);
         ArrayList<NewsEntry> entries = new ArrayList<>();
-        for (int i = 0; i < jsonArray.length(); ++ i)
+        for (int i = 0; i < jsonArray.length(); ++ i) {
+//            Log.d(LOG_TAG, jsonArray.getJSONObject(i).toString());
             entries.add(new NewsEntry(jsonArray.getJSONObject(i)));
+        }
+
         return entries;
     }
 }

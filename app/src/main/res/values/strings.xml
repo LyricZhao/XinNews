@@ -12,9 +12,13 @@
     <string name="share_button">分享</string>
     <string name="share_button_description">share_star</string>
     <string name="favorite_button">收藏</string>
-    <string name="news_card_title">新闻标题</string>
+    <string name="news_card_title">新闻标题：今天我很开心</string>
     <string name="news_card_image_description">新闻图片</string>
-    <string name="news_card_publisher">来源</string>
-    <string name="news_card_time">日期</string>
+    <string name="news_card_publisher">新华网</string>
+    <string name="news_card_time">2019年1月1日</string>
     <string name="news_card_share_description">分享</string>
+    <string name="news_card_category">科技</string>
+    <string name="news_card_content">
+        "留住灿烂文明，祝福伟大祖国\"首届\"运河记忆\"微电影大赛在津发布作品征集启事\n　　京杭大运河不仅是古代中国连接南北方的水路大动脉，更是一条流动的文化之河。大运河沿岸的非物质文化遗产资源丰富多样，其多姿多彩的表现形式、深厚丰富的非遗文化内涵，让运河文化古往今来欣欣向荣、熠熠生辉。\n　　为庆祝中华人民共和国成立70周年，进一步加强运河沿岸非遗文化交流，宣传运河沿岸优秀民间传统文化。由天津市文化和旅游局、天津市西青区人民政府联合主办，天津市非物质文化遗产保护中心、天津市非物质文化遗产保护协会、天津市西青区文化和旅游局承办的\"运河记忆\"第三届非物质文化遗产宣传展示活动近日备受关注。该活动在西青区杨柳青古镇举办了盛大的启动仪式。会上，首届\"运河记忆\"微电影
+    </string>
 </resources>

@@ -20,7 +20,7 @@
                 android:orientation="vertical">
 
             <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/news_card_title"
                     android:textAppearance="?android:textAppearanceLarge"
@@ -36,38 +36,45 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:layout_marginTop="4dp" >
+                    android:layout_marginTop="4dp">
 
                 <TextView
-                        android:id="@+id/news_card_category_card"
+                        android:id="@+id/news_card_category"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:ellipsize="end"
                         android:maxLines="1"
-                        android:layout_toStartOf="@id/news_card_thumbnail" />
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
+                        android:fontFamily="sans-serif"
+                        android:layout_toStartOf="@id/news_card_thumbnail"
+                        android:textColor="#4CAF50"
+                        android:text="@string/news_card_category"/>
 
                 <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/news_card_content"
                         android:layout_alignParentStart="true"
-                        android:layout_below="@id/news_card_category_card"
+                        android:layout_below="@id/news_card_category"
                         android:layout_marginBottom="8dp"
                         android:layout_marginLeft="16dp"
                         android:layout_marginRight="16dp"
                         android:ellipsize="end"
                         android:fontFamily="sans-serif-light"
                         android:maxLines="6"
-                        android:layout_toStartOf="@+id/news_card_thumbnail"/>
-                
+                        android:layout_toStartOf="@+id/news_card_thumbnail"
+                        android:textColor="#102027"
+                        android:text="@string/news_card_content"/>
+
                 <ImageView
                         android:id="@+id/news_card_thumbnail"
                         android:layout_width="140dp"
                         android:layout_height="120dp"
                         android:layout_alignParentEnd="true"
                         android:contentDescription="@string/news_card_image_description"
-                        android:scaleType="centerCrop" />
+                        android:scaleType="centerCrop"/>
 
             </RelativeLayout>
 
@@ -79,7 +86,8 @@
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"
                     android:fontFamily="sans-serif"
-                    android:text="@string/news_card_publisher" />
+                    android:textColor="#8e24aa"
+                    android:text="@string/news_card_publisher"/>
 
             <RelativeLayout
                     android:layout_width="wrap_content"
@@ -94,6 +102,7 @@
                         android:fontFamily="sans-serif"
                         android:layout_alignParentStart="true"
                         android:layout_toStartOf="@id/news_card_share"
+                        android:textColor="#a4a4a4"
                         android:text="@string/news_card_time"/>
 
                 <ImageView
@@ -103,7 +112,7 @@
                         android:layout_alignParentEnd="true"
                         android:layout_marginEnd="16dp"
                         android:contentDescription="@string/news_card_share_description"
-                        android:src="@drawable/ic_share_black_18dp" />
+                        android:src="@drawable/ic_share_black_18dp"/>
 
             </RelativeLayout>
 
