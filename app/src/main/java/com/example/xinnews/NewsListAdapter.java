@@ -11,10 +11,17 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.xinnews.database.NewsEntry;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.xinnews.NewsListAdapter.NewsItemType.NewsWithImage;
+import static com.example.xinnews.NewsListAdapter.NewsItemType.NewsWithoutImage;
+
 public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsViewHolder> {
+    public static enum NewsItemType {
+        NewsWithImage,
+        NewsWithoutImage
+    }
+
     private final LayoutInflater mInflater;
     private List<NewsEntry> mNews;
 
@@ -24,7 +31,13 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
 
     @Override
     public NewsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = mInflater.inflate(R.layout.news_card, parent, false);
+        View itemView = null;
+        if (NewsWithImage.ordinal() == viewType) {
+            itemView = mInflater.inflate(R.layout.news_card, parent, false);
+        } else if (NewsWithoutImage.ordinal() == viewType) {
+            itemView = mInflater.inflate(R.layout.news_card_without_image, parent, false);
+        }
+
         return new NewsViewHolder(itemView);
     }
 
@@ -36,6 +49,13 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         } else {
             // TODO: no news here
         }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (mNews.get(position).hasImage())
+            return NewsWithImage.ordinal();
+        return NewsWithoutImage.ordinal();
     }
 
     void setNews(List<NewsEntry> news) {
@@ -78,11 +98,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
             Log.e(LOG_TAG, news.getTitle());
             Log.e(LOG_TAG, news.toString());
             Log.e(LOG_TAG, "Setting view, bitmap size");
-            Bitmap bitmap = PicsCache.getCoverBitmap(news.getNewsId());
-            if (bitmap != null)
+            if (news.hasImage()) {
+                Bitmap bitmap = PicsCache.getCoverBitmap(news.getNewsId());
                 cardThumbnailView.setImageBitmap(bitmap);
+            }
             cardPublisherView.setText(news.getPublisher());
-            cardContentView.setText(news.getContent());
+            cardContentView.setText(news.getContent().trim());
         }
     }
 }

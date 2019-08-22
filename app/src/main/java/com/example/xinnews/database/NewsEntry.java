@@ -114,6 +114,10 @@ public class NewsEntry {
         return category;
     }
 
+    public boolean hasImage() {
+        return !images.equals("");
+    }
+
     public void logInfo() {
         Log.i(LOG_TAG, "News " + newsId + ":");
         Log.i(LOG_TAG, "  " + getTitle());
