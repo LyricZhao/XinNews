@@ -8,7 +8,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
-import com.example.xinnews.NewsCrawler;
+import com.example.xinnews.Bridge;
 
 import java.util.ArrayList;
 
@@ -55,12 +55,14 @@ public abstract class NewsRoomDatabase extends RoomDatabase {
             // TODO: refresh the news list when start the app
             mDao.deleteAll();
 
-            NewsCrawler newsCrawler = new NewsCrawler();
+            Bridge newsCrawler = new Bridge();
             try {
-                ArrayList<NewsEntry> newsEntries = newsCrawler.getNewsEntryArray(10, null, null, null, "科技");
+                Log.d(LOG_TAG, "Loading news ...");
+                ArrayList<NewsEntry> newsEntries = newsCrawler.getNewsEntryArray(30, null, null, null, "科技");
                 for (NewsEntry newsEntry: newsEntries) {
                     mDao.insert(newsEntry);
                 }
+                Log.d(LOG_TAG, "Find " + newsEntries.size() + " news.");
             } catch (Exception exception) {
                 // TODO: handle the exception
                 Log.e(LOG_TAG, exception.toString());

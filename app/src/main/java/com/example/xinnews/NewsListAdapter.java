@@ -1,6 +1,8 @@
 package com.example.xinnews;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +11,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.xinnews.database.NewsEntry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsViewHolder> {
@@ -55,6 +58,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         private TextView cardTimeView;
         private TextView cardContentView;
 
+        static private final String LOG_TAG = "NewsViewHolder";
+
         NewsViewHolder(View itemView) {
             super(itemView);
 
@@ -70,7 +75,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
             cardTitleView.setText(news.getTitle());
             cardCategoryView.setText(news.getCategory());
             cardTimeView.setText(news.getPublishTime());
-            // TODO: set thumbnail
+            Log.e(LOG_TAG, news.getTitle());
+            Log.e(LOG_TAG, news.toString());
+            Log.e(LOG_TAG, "Setting view, bitmap size");
+            Bitmap bitmap = PicsCache.getCoverBitmap(news.getNewsId());
+            if (bitmap != null)
+                cardThumbnailView.setImageBitmap(bitmap);
             cardPublisherView.setText(news.getPublisher());
             cardContentView.setText(news.getContent());
         }

@@ -1,5 +1,6 @@
 package com.example.xinnews;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +16,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private NewsViewModel mNewsViewModel;
+
+    @Override
+    public Context getApplicationContext() {
+        return super.getApplicationContext();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

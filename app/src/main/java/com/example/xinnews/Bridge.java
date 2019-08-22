@@ -1,21 +1,22 @@
 package com.example.xinnews;
 
+import android.app.Application;
+import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.view.WindowManager;
 import com.example.xinnews.database.NewsEntry;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class NewsCrawler {
-    static private final int defaultCrawlSize = 15;
-    static private final String LOG_TAG = "NewsCrawler";
+public class Bridge {
+    static private final int defaultCrawlSize = 10;
+    static private final String LOG_TAG = "Bridge";
     static private final String baseUrl = "https://api2.newsminer.net/svc/news/queryNewsList";
     static private final String encoding = "UTF-8";
     static private final String[] availableCategories = {"娱乐", "军事", "教育", "文化", "健康", "财经", "体育", "汽车", "科技", "社会"};
@@ -53,6 +54,35 @@ public class NewsCrawler {
         return BitmapFactory.decodeStream(input);
     }
 
+    public static String saveToInternalStorage(File dir, String newsImageId, Bitmap bitmap) {
+        File imagePath = new File(dir, newsImageId);
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(imagePath);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+        } catch (Exception exception) {
+            Log.e(LOG_TAG, exception.toString());
+        } finally {
+            try {
+                fileOutputStream.close();
+            } catch (IOException exception) {
+                Log.e(LOG_TAG, exception.toString());
+            }
+        }
+        return imagePath.getAbsolutePath();
+    }
+
+    public static Bitmap loadImageFromStorage(File dir, String newsImageId) {
+        Bitmap bitmap = null;
+        try {
+            File imagePath = new File(dir, newsImageId);
+            bitmap = BitmapFactory.decodeStream(new FileInputStream(imagePath));
+        } catch (FileNotFoundException exception) {
+            Log.e(LOG_TAG, exception.toString());
+        }
+        return bitmap;
+    }
+
     private static JSONArray getNewsJsonArray(int size, String startDate, String endDate, String words, String categories) throws Exception {
         if (size == 0) size = defaultCrawlSize;
         StringBuilder queryUrl = new StringBuilder(baseUrl + "?");
@@ -61,6 +91,7 @@ public class NewsCrawler {
         if (endDate != null) queryUrl.append("&endDate=").append(endDate);
         if (words != null) queryUrl.append("&words=").append(words);
         if (categories != null) queryUrl.append("&categories=").append(categories);
+        Log.d(LOG_TAG, "Querying url is " + queryUrl.toString());
         String jsonContent = getUrlContent(queryUrl.toString());
         JSONObject globalContent = new JSONObject(jsonContent);
         return globalContent.getJSONArray("data");

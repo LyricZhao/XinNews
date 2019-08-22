@@ -1,15 +1,21 @@
 package com.example.xinnews.database;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import com.example.xinnews.Bridge;
+import com.example.xinnews.MainActivity;
+import com.example.xinnews.PicsCache;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Parameter;
+import javax.xml.transform.sax.TemplatesHandler;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,6 +58,9 @@ public class NewsEntry {
 
     @ColumnInfo(name = "favorite")
     boolean favorite;
+
+    @Ignore
+    ArrayList<Bitmap> bitmapsCache = new ArrayList<>();
 
     public NewsEntry() { }
 
@@ -114,18 +123,31 @@ public class NewsEntry {
         Log.i(LOG_TAG, "  " + getPublishTime());
     }
 
-    public String loadData(String address) {
+    public String loadData(String address, int index) {
         // TODO: download web data and store, here it's the image/video data
+        Bridge newsCrawler = new Bridge();
+        Log.d(LOG_TAG,getTitle() + ": Loading image ...");
+        try {
+            Bitmap bitmap = Bridge.getImageFromUrl(address);
+            PicsCache.add(getNewsId(), bitmap);
+            Log.d(LOG_TAG, String.valueOf(index));
+            Log.d(LOG_TAG, this.toString());
+//            Bridge.saveToInternalStorage(getNewsId() + index, bitmap);
+        } catch (Exception exception) {
+            Log.e(LOG_TAG, exception.toString());
+        }
         return address;
     }
 
+    // TODO: differ image and video
     private String dataGenerate(String sources, boolean load) throws JSONException {
         if (!load) return sources;
         if (sources.length() < 3) return "";
         Matcher matcher = Pattern.compile("(.+?)[\\]|,]").matcher(sources.substring(1));
         JSONArray targetJson = new JSONArray();
+        int index = 0;
         while (matcher.find())
-            targetJson.put(matcher.group(1));
+            targetJson.put(loadData(matcher.group(1), index ++));
         return targetJson.toString();
     }
 
