@@ -20,8 +20,6 @@ public class PicsCache {
         Bitmap bitmap = hashMap.get(tag);
         if (bitmap == null) {
             try {
-                Log.d(LOG_TAG, tag);
-                Log.d(LOG_TAG, path);
                 hashMap.put(tag, Bridge.loadResourceFromPath(path));
                 bitmap = hashMap.get(tag);
             } catch (Exception exception) {

@@ -1,10 +1,13 @@
 package com.example.xinnews;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
 import android.util.Log;
+import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -19,9 +22,6 @@ public class NewsPage extends AppCompatActivity {
     public static final String EXTRA_NEWS_INFO = "com.example.xinnews.extra.NEWS_INFO";
     private static final String LOG_TAG = "NewsPage";
 
-    private TextView mTitleTextView;
-    private TextView mSubtitleTextView;
-    private TextView mContentTextView;
     private LinearLayout mLinearLayoutForImages;
 
     @Override
@@ -29,19 +29,46 @@ public class NewsPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        NewsEntry newsEntry = intent.getParcelableExtra(EXTRA_NEWS_INFO);
+        final NewsEntry newsEntry = intent.getParcelableExtra(EXTRA_NEWS_INFO);
 
         boolean hasImage = newsEntry.hasImage();
         if (hasImage) setContentView(R.layout.news_pages_with_image);
         else setContentView(R.layout.news_pages_without_image);
 
-        mTitleTextView = findViewById(R.id.news_title);
-        mSubtitleTextView = findViewById(R.id.news_subtitle);
-        mContentTextView = findViewById(R.id.news_content);
+        TextView mTitleTextView = findViewById(R.id.news_title);
+        TextView mSubtitleTextView = findViewById(R.id.news_subtitle);
+        TextView mContentTextView = findViewById(R.id.news_content);
+        ImageView mShareImageView = findViewById(R.id.news_share_icon);
+        TextView mShareTextView = findViewById(R.id.news_share_text);
+        ImageView mFavoriteImageView = findViewById(R.id.news_favorite_icon);
+        TextView mFavoriteTextView = findViewById(R.id.news_favorite_text);
 
         mTitleTextView.setText(newsEntry.getTitle());
         mSubtitleTextView.setText(newsEntry.generateSubtitle());
         mContentTextView.setText(newsEntry.getContent());
+
+        View.OnClickListener clickHandler = new View.OnClickListener() {
+            @SuppressLint("Assert")
+            @Override
+            public void onClick(View view) {
+                switch (view.getId()) {
+                    case R.id.news_share_icon:
+                    case R.id.news_share_text:
+                        CommonActions.share(newsEntry);
+                        break;
+                    case R.id.news_favorite_icon:
+                    case R.id.news_favorite_text:
+                        CommonActions.favorite(newsEntry);
+                        break;
+                    default:
+                        assert false;
+                }
+            }
+        };
+        mShareTextView.setOnClickListener(clickHandler);
+        mShareImageView.setOnClickListener(clickHandler);
+        mFavoriteTextView.setOnClickListener(clickHandler);
+        mFavoriteImageView.setOnClickListener(clickHandler);
 
         if (hasImage) {
             mLinearLayoutForImages = findViewById(R.id.linear_layout_for_images);
@@ -55,8 +82,8 @@ public class NewsPage extends AppCompatActivity {
     }
 
     private class ImageRequestWrapper {
-        public String newsId;
-        public ArrayList<String> paths;
+        String newsId;
+        ArrayList<String> paths;
 
         ImageRequestWrapper(String newsId, ArrayList<String> paths) {
             this.newsId = newsId;
@@ -75,10 +102,12 @@ public class NewsPage extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(ArrayList<Bitmap> results) {
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
             for (Bitmap bitmap: results) {
                 ImageView imageView = new ImageView(getApplicationContext());
+                imageView.setLayoutParams(layoutParams);
                 imageView.setImageBitmap(bitmap);
-                imageView.setPadding(16, 16, 16, 16);
+                imageView.setPadding(8, 8, 8, 8);
                 imageView.setScaleType(ImageView.ScaleType.FIT_XY);
                 mLinearLayoutForImages.addView(imageView);
             }
