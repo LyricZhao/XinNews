@@ -1,11 +1,11 @@
 package com.example.xinnews;
 
 import android.app.Application;
-import android.content.ContextWrapper;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.util.Log;
-import android.view.WindowManager;
 import com.example.xinnews.database.NewsEntry;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,6 +20,11 @@ public class Bridge {
     static private final String baseUrl = "https://api2.newsminer.net/svc/news/queryNewsList";
     static private final String encoding = "UTF-8";
     static private final String[] availableCategories = {"娱乐", "军事", "教育", "文化", "健康", "财经", "体育", "汽车", "科技", "社会"};
+    static private File systemCacheDir = null;
+
+    static void setSystemCacheDir(File path) {
+        systemCacheDir = path;
+    }
 
     static boolean isLegalCategory(String category) {
         for (String availableCategory: availableCategories)
@@ -72,20 +77,23 @@ public class Bridge {
         return imagePath.getAbsolutePath();
     }
 
-    public static Bitmap loadImageFromStorage(File dir, String newsImageId) {
+    public static Bitmap loadImageFromStorage(File dir, String newsImageId) throws FileNotFoundException {
         Bitmap bitmap = null;
-        try {
-            File imagePath = new File(dir, newsImageId);
-            bitmap = BitmapFactory.decodeStream(new FileInputStream(imagePath));
-        } catch (FileNotFoundException exception) {
-            Log.e(LOG_TAG, exception.toString());
-        }
+        File imagePath = new File(dir, newsImageId);
+        bitmap = BitmapFactory.decodeStream(new FileInputStream(imagePath));
         return bitmap;
     }
 
-    public static Bitmap loadResourceFromPath(String path) throws Exception {
-        // TODO: judge the location of the path
-        return getImageFromUrl(path);
+    public static Bitmap loadResourceFromPath(String newsImageId, String webPath) throws Exception {
+        Bitmap bitmap = null;
+        assert systemCacheDir!= null;
+        try {
+            bitmap = loadImageFromStorage(systemCacheDir, newsImageId);
+        } catch (FileNotFoundException exception) {
+            bitmap = getImageFromUrl(webPath);
+            saveToInternalStorage(systemCacheDir, newsImageId, bitmap);
+        }
+        return bitmap;
     }
 
     private static JSONArray getNewsJsonArray(int size, String startDate, String endDate, String words, String categories) throws Exception {
