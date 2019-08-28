@@ -16,6 +16,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private NewsViewModel mNewsViewModel;
+    private RecyclerView mRecyclerView;
 
     @Override
     public Context getApplicationContext() {
@@ -29,10 +30,10 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerview);
+        mRecyclerView = findViewById(R.id.recyclerview);
         final NewsListAdapter adapter = new NewsListAdapter(this);
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         mNewsViewModel = ViewModelProviders.of(this).get(NewsViewModel.class);
         mNewsViewModel.getAllNews().observe(this, new Observer<List<NewsEntry>>() {

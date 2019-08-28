@@ -55,10 +55,9 @@ public abstract class NewsRoomDatabase extends RoomDatabase {
             // TODO: refresh the news list when start the app
             mDao.deleteAll();
 
-            Bridge newsCrawler = new Bridge();
             try {
                 Log.d(LOG_TAG, "Loading news ...");
-                ArrayList<NewsEntry> newsEntries = newsCrawler.getNewsEntryArray(30, null, null, null, "科技");
+                ArrayList<NewsEntry> newsEntries = Bridge.getNewsEntryArray(15, null, null, null, "科技");
                 for (NewsEntry newsEntry: newsEntries) {
                     mDao.insert(newsEntry);
                 }

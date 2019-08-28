@@ -1,15 +1,20 @@
 package com.example.xinnews;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.xinnews.database.NewsEntry;
+import org.json.JSONException;
 
 import java.util.List;
 
@@ -22,10 +27,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         NewsWithoutImage
     }
 
+    private Context mContext;
     private final LayoutInflater mInflater;
     private List<NewsEntry> mNews;
 
     NewsListAdapter(Context context) {
+        mContext = context;
         mInflater = LayoutInflater.from(context);
     }
 
@@ -41,14 +48,20 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         return new NewsViewHolder(itemView);
     }
 
+    // TODO: empty news
     @Override
     public void onBindViewHolder(NewsViewHolder holder, int position) {
-        if (mNews != null) {
-            NewsEntry current = mNews.get(position);
-            holder.setView(current);
-        } else {
-            // TODO: no news here
-        }
+        final NewsEntry current = mNews.get(position);
+        holder.setView(current);
+
+        holder.getCardView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(mContext, NewsPage.class);
+                intent.putExtra(NewsPage.EXTRA_NEWS_INFO, current);
+                mContext.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -77,18 +90,38 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         private TextView cardPublisherView;
         private TextView cardTimeView;
         private TextView cardContentView;
+        private CardView cardView;
 
         static private final String LOG_TAG = "NewsViewHolder";
 
         NewsViewHolder(View itemView) {
             super(itemView);
 
+            cardView = itemView.findViewById(R.id.card_view);
             cardTitleView = itemView.findViewById(R.id.news_card_title);
             cardCategoryView = itemView.findViewById(R.id.news_card_category);
             cardThumbnailView = itemView.findViewById(R.id.news_card_thumbnail);
             cardPublisherView = itemView.findViewById(R.id.news_card_publisher);
             cardTimeView = itemView.findViewById(R.id.news_card_time);
             cardContentView = itemView.findViewById(R.id.news_card_content);
+        }
+
+        CardView getCardView() {
+            return cardView;
+        }
+
+        private class DownloadTask extends AsyncTask<String, Void, Bitmap> {
+            @Override
+            protected Bitmap doInBackground(String... strings) {
+                String newsId = strings[0], coverImagePath = strings[1];
+                Bitmap bitmap = PicsCache.getCoverBitmap(newsId, coverImagePath);
+                return bitmap;
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                cardThumbnailView.setImageBitmap(bitmap);
+            }
         }
 
         void setView(NewsEntry news) {
@@ -99,8 +132,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
             Log.e(LOG_TAG, news.toString());
             Log.e(LOG_TAG, "Setting view, bitmap size");
             if (news.hasImage()) {
-                Bitmap bitmap = PicsCache.getCoverBitmap(news.getNewsId());
-                cardThumbnailView.setImageBitmap(bitmap);
+                try {
+                    DownloadTask downloadTask = new DownloadTask();
+                    downloadTask.execute(news.getNewsId(), news.getCoverImagePath());
+                } catch (Exception exception) {
+                    Log.e(LOG_TAG, exception.toString());
+                }
             }
             cardPublisherView.setText(news.getPublisher());
             cardContentView.setText(news.getContent().trim());

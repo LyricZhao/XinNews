@@ -1,26 +1,23 @@
 package com.example.xinnews.database;
 
-import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
-import com.example.xinnews.Bridge;
-import com.example.xinnews.MainActivity;
-import com.example.xinnews.PicsCache;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.xml.transform.sax.TemplatesHandler;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Entity(tableName = "news_table")
-public class NewsEntry {
+public class NewsEntry implements Parcelable {
 
     private static final String LOG_TAG = "NewsEntry";
 
@@ -59,9 +56,6 @@ public class NewsEntry {
     @ColumnInfo(name = "favorite")
     boolean favorite;
 
-    @Ignore
-    ArrayList<Bitmap> bitmapsCache = new ArrayList<>();
-
     public NewsEntry() { }
 
     public NewsEntry(@NonNull JSONObject news) throws JSONException {
@@ -71,13 +65,40 @@ public class NewsEntry {
         this.content = news.getString("content");
         this.publishTime = news.getString("publishTime");
         this.keywords = news.getJSONArray("keywords").toString();
-        this.images = dataGenerate(news.getString("image"), true);
-        this.videos = dataGenerate(news.getString("video"), false);
+        this.images = dataGenerate(news.getString("image"));
+        this.videos = dataGenerate(news.getString("video"));
         this.publisher = news.getString("publisher") + " "; // TODO: maybe we can remove the space later
         this.viewed = false;
         this.favorite = false;
     }
 
+    protected NewsEntry(Parcel in) {
+        newsId = Objects.requireNonNull(in.readString());
+        title = in.readString();
+        content = in.readString();
+        category = in.readString();
+        publishTime = in.readString();
+        keywords = in.readString();
+        images = in.readString();
+        videos = in.readString();
+        publisher = in.readString();
+        viewed = in.readByte() != 0;
+        favorite = in.readByte() != 0;
+    }
+
+    public static final Creator<NewsEntry> CREATOR = new Creator<NewsEntry>() {
+        @Override
+        public NewsEntry createFromParcel(Parcel in) {
+            return new NewsEntry(in);
+        }
+
+        @Override
+        public NewsEntry[] newArray(int size) {
+            return new NewsEntry[size];
+        }
+    };
+
+    @NonNull
     public String getNewsId() {
         return newsId;
     }
@@ -114,6 +135,30 @@ public class NewsEntry {
         return category;
     }
 
+    public String getCoverImagePath() throws JSONException {
+        JSONArray jsonArray = new JSONArray(images);
+        return jsonArray.getString(0);
+    }
+
+    public ArrayList<String> getAllImagePaths() throws JSONException {
+        JSONArray jsonArray = new JSONArray(images);
+        ArrayList<String> arrayList = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); ++ i)
+            arrayList.add(jsonArray.getString(i));
+        return arrayList;
+    }
+
+    public String generateSubtitle() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("来源: " );
+        stringBuilder.append(publisher);
+        stringBuilder.append(" / ");
+        stringBuilder.append(category);
+        stringBuilder.append("  ");
+        stringBuilder.append(publishTime);
+        return stringBuilder.toString();
+    }
+
     public boolean hasImage() {
         return !images.equals("");
     }
@@ -127,32 +172,33 @@ public class NewsEntry {
         Log.i(LOG_TAG, "  " + getPublishTime());
     }
 
-    public String loadData(String address, int index) {
-        // TODO: download web data and store, here it's the image/video data
-        Bridge newsCrawler = new Bridge();
-        Log.d(LOG_TAG,getTitle() + ": Loading image ...");
-        try {
-            Bitmap bitmap = Bridge.getImageFromUrl(address);
-            PicsCache.add(getNewsId(), bitmap);
-            Log.d(LOG_TAG, String.valueOf(index));
-            Log.d(LOG_TAG, this.toString());
-//            Bridge.saveToInternalStorage(getNewsId() + index, bitmap);
-        } catch (Exception exception) {
-            Log.e(LOG_TAG, exception.toString());
-        }
-        return address;
-    }
-
-    // TODO: differ image and video
-    private String dataGenerate(String sources, boolean load) throws JSONException {
-        if (!load) return sources;
+    private String dataGenerate(String sources) throws JSONException {
         if (sources.length() < 3) return "";
         Matcher matcher = Pattern.compile("(.+?)[\\]|,]").matcher(sources.substring(1));
         JSONArray targetJson = new JSONArray();
-        int index = 0;
         while (matcher.find())
-            targetJson.put(loadData(matcher.group(1), index ++));
+            targetJson.put(matcher.group(1));
         return targetJson.toString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(newsId);
+        dest.writeString(title);
+        dest.writeString(content);
+        dest.writeString(category);
+        dest.writeString(publishTime);
+        dest.writeString(keywords);
+        dest.writeString(images);
+        dest.writeString(videos);
+        dest.writeString(publisher);
+        dest.writeByte((byte) (viewed ? 1 : 0));
+        dest.writeByte((byte) (favorite ? 1 : 0));
     }
 
     // TODO: functions of getting information

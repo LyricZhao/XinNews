@@ -22,6 +22,10 @@ public class NewsViewModel extends AndroidViewModel {
         return mAllNews;
     }
 
+    public NewsEntry getNews(int position) {
+        return mAllNews.getValue().get(position);
+    }
+
     public void insert(NewsEntry news) {
         mRepository.insert(news);
     }

@@ -83,6 +83,11 @@ public class Bridge {
         return bitmap;
     }
 
+    public static Bitmap loadResourceFromPath(String path) throws Exception {
+        // TODO: judge the location of the path
+        return getImageFromUrl(path);
+    }
+
     private static JSONArray getNewsJsonArray(int size, String startDate, String endDate, String words, String categories) throws Exception {
         if (size == 0) size = defaultCrawlSize;
         StringBuilder queryUrl = new StringBuilder(baseUrl + "?");
