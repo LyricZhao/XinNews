@@ -1,5 +1,6 @@
 package com.example.xinnews.database;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -19,7 +20,9 @@ import java.util.regex.Pattern;
 @Entity(tableName = "news_table")
 public class NewsEntry implements Parcelable {
 
+    private static final int BRIEF_MIN_LENGTH = 50;
     private static final String LOG_TAG = "NewsEntry";
+    private static final String shareFormat = "标题：%s\n摘要：%s\n发布时间：%s\n作者：%s\n正文链接：%s\n来自欣闻客户端";
 
     @PrimaryKey
     @NonNull
@@ -56,6 +59,9 @@ public class NewsEntry implements Parcelable {
     @ColumnInfo(name = "favorite")
     boolean favorite;
 
+    @ColumnInfo(name = "link")
+    String link;
+
     public NewsEntry() { }
 
     public NewsEntry(@NonNull JSONObject news) throws JSONException {
@@ -64,6 +70,7 @@ public class NewsEntry implements Parcelable {
         this.category = news.getString("category");
         this.content = news.getString("content");
         this.publishTime = news.getString("publishTime");
+        this.link = news.getString("url");
         this.keywords = news.getJSONArray("keywords").toString();
         this.images = dataGenerate(news.getString("image"));
         this.videos = dataGenerate(news.getString("video"));
@@ -82,6 +89,7 @@ public class NewsEntry implements Parcelable {
         images = in.readString();
         videos = in.readString();
         publisher = in.readString();
+        link = in.readString();
         viewed = in.readByte() != 0;
         favorite = in.readByte() != 0;
     }
@@ -115,6 +123,10 @@ public class NewsEntry implements Parcelable {
         return publishTime;
     }
 
+    public String getLink() {
+        return link;
+    }
+
     public String getKeywords() {
         return keywords;
     }
@@ -133,6 +145,16 @@ public class NewsEntry implements Parcelable {
 
     public String getCategory() {
         return category;
+    }
+
+    public int getImageCount() {
+        try {
+            if (!hasImage()) return 0;
+            return new JSONArray(images).length();
+        } catch (Exception exception) {
+            Log.e(LOG_TAG, exception.toString());
+            return 0;
+        }
     }
 
     public String getCoverImagePath() throws JSONException {
@@ -197,9 +219,17 @@ public class NewsEntry implements Parcelable {
         dest.writeString(images);
         dest.writeString(videos);
         dest.writeString(publisher);
+        dest.writeString(link);
         dest.writeByte((byte) (viewed ? 1 : 0));
         dest.writeByte((byte) (favorite ? 1 : 0));
     }
 
-    // TODO: functions of getting information
+    public String getBriefContent() {
+        int length = content.length();
+        return content.substring(0, Math.min(length, BRIEF_MIN_LENGTH)) + "...";
+    }
+
+    public String getShareContent() {
+        return String.format(shareFormat, title, getBriefContent(), publishTime, publisher, link);
+    }
 }

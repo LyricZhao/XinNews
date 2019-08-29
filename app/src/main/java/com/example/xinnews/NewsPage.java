@@ -54,7 +54,7 @@ public class NewsPage extends AppCompatActivity {
                 switch (view.getId()) {
                     case R.id.news_share_icon:
                     case R.id.news_share_text:
-                        CommonActions.share(newsEntry);
+                        CommonActions.share(newsEntry, getApplicationContext());
                         break;
                     case R.id.news_favorite_icon:
                     case R.id.news_favorite_text:

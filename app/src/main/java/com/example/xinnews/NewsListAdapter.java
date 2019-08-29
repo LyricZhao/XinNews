@@ -91,6 +91,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         private TextView cardTimeView;
         private TextView cardContentView;
         private CardView cardView;
+        private ImageView cardShareButton;
 
         static private final String LOG_TAG = "NewsViewHolder";
 
@@ -104,6 +105,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
             cardPublisherView = itemView.findViewById(R.id.news_card_publisher);
             cardTimeView = itemView.findViewById(R.id.news_card_time);
             cardContentView = itemView.findViewById(R.id.news_card_content);
+            cardShareButton = itemView.findViewById(R.id.news_card_share);
         }
 
         CardView getCardView() {
@@ -124,7 +126,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
             }
         }
 
-        void setView(NewsEntry news) {
+        void setView(final NewsEntry news) {
             cardTitleView.setText(news.getTitle());
             cardCategoryView.setText(news.getCategory());
             cardTimeView.setText(news.getPublishTime());
@@ -141,6 +143,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
             }
             cardPublisherView.setText(news.getPublisher());
             cardContentView.setText(news.getContent().trim());
+            cardShareButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    CommonActions.share(news, mContext);
+                }
+            });
         }
     }
 }

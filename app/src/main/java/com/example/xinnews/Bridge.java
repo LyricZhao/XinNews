@@ -1,10 +1,9 @@
 package com.example.xinnews;
 
-import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Environment;
+import android.net.Uri;
 import android.util.Log;
 import com.example.xinnews.database.NewsEntry;
 import org.json.JSONArray;
@@ -41,6 +40,27 @@ public class Bridge {
         while ((incoming = bufferedReader.readLine()) != null)
             result.append(incoming);
         return result.toString();
+    }
+
+    private static String tagger(String newsId, int index) {
+        return newsId + "_" + index;
+    }
+
+    public static Uri generateCoverImageUri(String newsId, Context context) {
+        File coverImage = new File(systemCacheDir, tagger(newsId, 0));
+        return GenericFileProvider.getUriForFile(context.getApplicationContext(), BuildConfig.APPLICATION_ID + ".provider", coverImage);
+    }
+
+    public static ArrayList<Uri> generateAllImagesUri(String newsId, Context context, int count) {
+        ArrayList<Uri> imageUris = new ArrayList<>();
+        Context appContext = context.getApplicationContext();
+        String providerId = BuildConfig.APPLICATION_ID + ".provider";
+        for (int i = 0; i < count; ++ i) {
+            File imageFile = new File(systemCacheDir, tagger(newsId, i));
+            Uri imageUri = GenericFileProvider.getUriForFile(appContext, providerId, imageFile);
+            imageUris.add(imageUri);
+        }
+        return imageUris;
     }
 
     static boolean checkConnectionToApi() {
