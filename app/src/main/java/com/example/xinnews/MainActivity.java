@@ -3,8 +3,6 @@ package com.example.xinnews;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import androidx.annotation.NonNull;
@@ -12,14 +10,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.xinnews.database.NewsEntry;
 import com.google.android.material.navigation.NavigationView;
-
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -50,12 +44,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         mNewsViewModel = ViewModelProviders.of(this).get(NewsViewModel.class);
-        mNewsViewModel.getCurrentNews().observe(this, new Observer<List<NewsEntry>>() {
-            @Override
-            public void onChanged(List<NewsEntry> newsEntries) {
-                adapter.setNews(newsEntries);
-            }
-        });
     }
 
     private void loadCategoryPreferences(Menu menu) {
@@ -105,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         String title = item.getTitle().toString();
-        mNewsViewModel.setCurrentCategory(title);
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

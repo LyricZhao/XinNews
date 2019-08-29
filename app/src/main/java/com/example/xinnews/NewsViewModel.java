@@ -1,45 +1,35 @@
 package com.example.xinnews;
 
 import android.app.Application;
+import android.os.AsyncTask;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
+import com.example.xinnews.database.NewsDao;
 import com.example.xinnews.database.NewsEntry;
-import com.example.xinnews.database.NewsRepository;
-
-import java.util.List;
+import com.example.xinnews.database.NewsRoomDatabase;
 
 public class NewsViewModel extends AndroidViewModel {
-    private NewsRepository mRepository;
-    private LiveData<List<NewsEntry>> mAllNews;
-    private LiveData<List<NewsEntry>> mCurrentNews;
-    private String currentCategory;
+    private NewsDao newsDao;
 
     public NewsViewModel(Application application) {
         super(application);
-        mRepository = new NewsRepository(application);
-        mAllNews = mRepository.getAllNews();
-        currentCategory = "科技";
-        mCurrentNews = mRepository.getCurrentNews(currentCategory);
-    }
-
-    LiveData<List<NewsEntry>> getAllNews() {
-        return mAllNews;
-    }
-
-    LiveData<List<NewsEntry>> getCurrentNews() {
-        return mCurrentNews;
-    }
-
-    public NewsEntry getNews(int position) {
-        return mAllNews.getValue().get(position);
-    }
-
-    public void setCurrentCategory(String category) {
-        currentCategory = category;
-        mRepository.setCurrentCategory(currentCategory);
+        newsDao = NewsRoomDatabase.getDatabase(application).newsDao();
     }
 
     public void insert(NewsEntry news) {
-        mRepository.insert(news);
+        new insertSingleAsyncTask(newsDao).execute(news);
+    }
+
+    private static class insertSingleAsyncTask extends AsyncTask<NewsEntry, Void, Void> {
+        private NewsDao mAsyncTaskDao;
+
+        insertSingleAsyncTask(NewsDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final NewsEntry... params) {
+            mAsyncTaskDao.insert(params[0]);
+            return null;
+        }
     }
 }

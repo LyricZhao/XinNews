@@ -26,7 +26,7 @@ public abstract class NewsRoomDatabase extends RoomDatabase {
     };
 
     // TODO: determine the migration option
-    static NewsRoomDatabase getDatabase(final Context context) {
+    static public NewsRoomDatabase getDatabase(final Context context) {
         if (Instance == null) {
             synchronized (NewsRoomDatabase.class) {
                 if (Instance == null) {
