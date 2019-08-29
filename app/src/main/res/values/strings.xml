@@ -21,4 +21,16 @@
     <string name="news_card_content">
         "留住灿烂文明，祝福伟大祖国\"首届\"运河记忆\"微电影大赛在津发布作品征集启事\n　　京杭大运河不仅是古代中国连接南北方的水路大动脉，更是一条流动的文化之河。大运河沿岸的非物质文化遗产资源丰富多样，其多姿多彩的表现形式、深厚丰富的非遗文化内涵，让运河文化古往今来欣欣向荣、熠熠生辉。\n　　为庆祝中华人民共和国成立70周年，进一步加强运河沿岸非遗文化交流，宣传运河沿岸优秀民间传统文化。由天津市文化和旅游局、天津市西青区人民政府联合主办，天津市非物质文化遗产保护中心、天津市非物质文化遗产保护协会、天津市西青区文化和旅游局承办的\"运河记忆\"第三届非物质文化遗产宣传展示活动近日备受关注。该活动在西青区杨柳青古镇举办了盛大的启动仪式。会上，首届\"运河记忆\"微电影
     </string>
+    <string name="xinnews_side_nav">欣闻</string>
+    <string name="nav_home">主页</string>
+    <string name="nav_entertainment">娱乐</string>
+    <string name="nav_military">军事</string>
+    <string name="nav_education">教育</string>
+    <string name="nav_culture">文化</string>
+    <string name="nav_health">健康</string>
+    <string name="nav_finance">财经</string>
+    <string name="nav_sports">体育</string>
+    <string name="nav_auto">汽车</string>
+    <string name="nav_tech">科技</string>
+    <string name="nav_society">社会</string>
 </resources>

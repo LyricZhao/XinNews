@@ -1,0 +1,51 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+                android:id="@+id/nav_home"
+                android:icon="@drawable/ic_home_black_24dp"
+                android:title="@string/nav_home" />
+        <item
+                android:id="@+id/nav_entertainment"
+                android:icon="@drawable/ic_movie_filter_black_24dp"
+                android:title="@string/nav_entertainment" />
+        <item
+                android:id="@+id/nav_military"
+                android:icon="@drawable/ic_airplanemode_active_black_24dp"
+                android:title="@string/nav_military" />
+        <item
+                android:id="@+id/nav_education"
+                android:icon="@drawable/ic_school_black_24dp"
+                android:title="@string/nav_education" />
+        <item
+                android:id="@+id/nav_culture"
+                android:icon="@drawable/ic_message_black_24dp"
+                android:title="@string/nav_culture" />
+        <item
+                android:id="@+id/nav_health"
+                android:icon="@drawable/ic_airline_seat_recline_normal_black_24dp"
+                android:title="@string/nav_health" />
+        <item
+                android:id="@+id/nav_finance"
+                android:icon="@drawable/ic_business_center_black_24dp"
+                android:title="@string/nav_finance" />
+        <item
+                android:id="@+id/nav_sports"
+                android:icon="@drawable/ic_directions_run_black_24dp"
+                android:title="@string/nav_sports" />
+        <item
+                android:id="@+id/nav_auto"
+                android:icon="@drawable/ic_directions_car_black_24dp"
+                android:title="@string/nav_auto" />
+        <item
+                android:id="@+id/nav_tech"
+                android:icon="@drawable/ic_computer_black_24dp"
+                android:title="@string/nav_tech" />
+        <item
+                android:id="@+id/nav_society"
+                android:icon="@drawable/ic_people_black_24dp"
+                android:title="@string/nav_society" />
+    </group>
+</menu>
