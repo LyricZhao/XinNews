@@ -7,6 +7,8 @@ import com.example.xinnews.database.NewsDao;
 import com.example.xinnews.database.NewsEntry;
 import com.example.xinnews.database.NewsRoomDatabase;
 
+import java.util.List;
+
 public class NewsViewModel extends AndroidViewModel {
     private NewsDao newsDao;
 
@@ -17,6 +19,10 @@ public class NewsViewModel extends AndroidViewModel {
 
     public void insert(NewsEntry news) {
         new insertSingleAsyncTask(newsDao).execute(news);
+    }
+
+    public List<NewsEntry> getNewsForCategory(String category) {
+        return newsDao.getNewsForCategory(category);
     }
 
     private static class insertSingleAsyncTask extends AsyncTask<NewsEntry, Void, Void> {

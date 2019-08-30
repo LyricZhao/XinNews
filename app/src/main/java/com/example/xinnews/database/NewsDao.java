@@ -20,5 +20,5 @@ public interface NewsDao {
     List<NewsEntry> getAllNews();
 
     @Query("SELECT * FROM news_table WHERE category LIKE :category")
-    List<NewsEntry> getCurrentNews(String category);
+    List<NewsEntry> getNewsForCategory(String category);
 }

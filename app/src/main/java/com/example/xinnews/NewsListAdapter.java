@@ -76,6 +76,17 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         notifyDataSetChanged();
     }
 
+    void addNewsToEnd(List<NewsEntry> news) {
+        mNews.addAll(mNews);
+        notifyDataSetChanged();
+    }
+
+    void addNewsToFront(List<NewsEntry> news) {
+        news.addAll(mNews);
+        mNews = news;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
         if (mNews != null)
