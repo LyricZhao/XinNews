@@ -2,11 +2,30 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
+    <group
+            android:id="@+id/nav_menu_group_1"
+            android:checkableBehavior="single">
         <item
                 android:id="@+id/nav_home"
                 android:icon="@drawable/ic_home_black_24dp"
                 android:title="@string/nav_home" />
+        <item
+                android:id="@+id/nav_favorite"
+                android:icon="@drawable/ic_favorite_black_24dp"
+                android:title="@string/nav_favorite" />
+        <item
+                android:id="@+id/nav_recommend"
+                android:icon="@drawable/ic_wb_incandescent_black_24dp"
+                android:title="@string/nav_recommend" />
+        <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_settings_black_24dp"
+                android:title="@string/nav_settings" />
+    </group>
+
+    <group
+            android:id="@+id/nav_menu_group_2"
+            android:checkableBehavior="single">
         <item
                 android:id="@+id/nav_entertainment"
                 android:icon="@drawable/ic_movie_filter_black_24dp"

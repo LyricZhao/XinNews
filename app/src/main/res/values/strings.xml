@@ -33,4 +33,7 @@
     <string name="nav_auto">汽车</string>
     <string name="nav_tech">科技</string>
     <string name="nav_society">社会</string>
+    <string name="nav_favorite">收藏</string>
+    <string name="nav_recommend">推荐</string>
+    <string name="nav_settings">管理</string>
 </resources>

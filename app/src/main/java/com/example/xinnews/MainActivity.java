@@ -1,6 +1,9 @@
 package com.example.xinnews;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -29,6 +32,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private String currentCategory = null;
     private NewsListAdapter mNewsListAdapter;
 
+    NavigationView navigationView;
+    Menu navigationMenu;
+    boolean[] openedCategory = new boolean[Constants.allCategoriesCount];
+
     @Override
     public Context getApplicationContext() {
         return super.getApplicationContext();
@@ -42,9 +49,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        loadCategoryPreferences(navigationView.getMenu());
+        navigationMenu = navigationView.getMenu();
+        loadCategoryPreferences();
 
         mRecyclerView = findViewById(R.id.recyclerview);
         mNewsListAdapter = new NewsListAdapter(this);
@@ -104,9 +112,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void loadCategoryPreferences(Menu menu) {
+    private void loadCategoryPreferences() {
         SharedPreferences categories = getSharedPreferences("categories", Context.MODE_PRIVATE);
-        boolean[] opened = new boolean[Constants.allCategoriesCount];
         if (!categories.contains("CREATED")) {
             SharedPreferences.Editor editor = categories.edit();
             editor.putBoolean("CREATED", true);
@@ -114,14 +121,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 editor.putBoolean(category, true);
             editor.apply();
             for (int i = 0; i < Constants.allCategoriesCount; ++i)
-                opened[i] = true;
+                openedCategory[i] = true;
         } else {
             for (int i = 0; i < Constants.allCategoriesCount; ++ i)
-                opened[i] = categories.getBoolean(Constants.categories[i], true);
+                openedCategory[i] = categories.getBoolean(Constants.categories[i], true);
         }
-        menu.getItem(0).setChecked(true);
+        navigationMenu.getItem(0).setChecked(true);
         for (int i = 0; i < Constants.allCategoriesCount; ++ i)
-            menu.getItem(i + 1).setVisible(opened[i]);
+            navigationMenu.getItem(i + Constants.navigationOffset).setVisible(openedCategory[i]);
+    }
+
+    private void saveCategoryPreferences() {
+        SharedPreferences categories = getSharedPreferences("categories", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = categories.edit();
+        editor.putBoolean("CREATED", true);
+        for (int i = 0; i < Constants.allCategoriesCount; ++ i)
+            editor.putBoolean(Constants.categories[i], openedCategory[i]);
+        editor.apply();
+        for (int i = 0; i < Constants.allCategoriesCount; ++ i)
+            navigationMenu.getItem(i + Constants.navigationOffset).setVisible(openedCategory[i]);
     }
 
     @Override
@@ -149,9 +167,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         String title = item.getTitle().toString();
-        refreshNewsList(title);
-        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
-        drawerLayout.closeDrawer(GravityCompat.START);
+        if (title.equals(Constants.categorySettings)) {
+            showCategorySectionDialog();
+            return false;
+        } else {
+            refreshNewsList(title);
+            DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }
         return true;
+    }
+
+    private void showCategorySectionDialog() {
+        final String[] items = Constants.categories;
+        final boolean choices[] = openedCategory;
+        AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+        dialog.setTitle("分类管理");
+        dialog.setMultiChoiceItems(items, choices, new DialogInterface.OnMultiChoiceClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                openedCategory[which] = isChecked;
+            }
+        });
+        dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                saveCategoryPreferences();
+            }
+        });
+        dialog.show();
     }
 }

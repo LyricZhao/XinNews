@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 public class CommonActions {
 
+    // TODO: Bug, java.lang.String cannot be cast to java.util.ArrayList
     public static void share(NewsEntry newsEntry, Context context) {
         Intent shareIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, newsEntry.getTitle());
