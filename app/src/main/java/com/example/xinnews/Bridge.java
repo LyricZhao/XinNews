@@ -63,6 +63,11 @@ public class Bridge {
         return imageUris;
     }
 
+    public static ArrayList<NewsEntry> getRecommendNewsEntryArray(int size) {
+        ArrayList<NewsEntry> recommendNews = new ArrayList<>();
+        return recommendNews;
+    }
+
     static boolean checkConnectionToApi() {
         try {
             String content = getUrlContent(baseUrl);

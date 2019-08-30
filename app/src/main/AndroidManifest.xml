@@ -16,7 +16,12 @@
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true"
             tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".NewsPage">
+        <activity android:name=".NewsPage"
+                  android:label="新闻详情"
+                  android:parentActivityName=".MainActivity">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.example.xinnews.MainActivity" />
         </activity>
         <activity
                 android:name=".MainActivity"

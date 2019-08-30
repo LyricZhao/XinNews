@@ -7,11 +7,12 @@ import com.example.xinnews.database.NewsDao;
 import com.example.xinnews.database.NewsEntry;
 import com.example.xinnews.database.NewsRoomDatabase;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DbBridge {
     private static NewsDao newsDao;
-    private static final String LOG_TAG = "NewsViewModel";
+    private static final String LOG_TAG = "DbBridge";
 
     public static void init(Application application) {
         newsDao = NewsRoomDatabase.getDatabase(application).newsDao();
@@ -30,6 +31,8 @@ public class DbBridge {
             return newsDao.getAllNews();
         if (category.equals(Constants.favorite))
             return newsDao.getFavoriteNews();
+        if (category.equals(Constants.recommend))
+            return new ArrayList<NewsEntry>();
         return newsDao.getNewsForCategory(category);
     }
 

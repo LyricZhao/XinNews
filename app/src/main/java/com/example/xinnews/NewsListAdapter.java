@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.xinnews.database.NewsEntry;
 import org.json.JSONException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.example.xinnews.NewsListAdapter.NewsItemType.NewsWithImage;
@@ -30,10 +32,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
     private Context mContext;
     private final LayoutInflater mInflater;
     private List<NewsEntry> mNews;
+    private MainActivity parentActivity;
 
-    NewsListAdapter(Context context) {
+    NewsListAdapter(Context context, MainActivity parentActivity) {
         mContext = context;
         mInflater = LayoutInflater.from(context);
+        this.parentActivity = parentActivity;
     }
 
     @Override
@@ -59,7 +63,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
             public void onClick(View view) {
                 Intent intent = new Intent(mContext, NewsPage.class);
                 intent.putExtra(NewsPage.EXTRA_NEWS_INFO, current);
-                mContext.startActivity(intent);
+                parentActivity.callNewsPage(intent);
             }
         });
     }
@@ -77,14 +81,26 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
     }
 
     void addNewsToEnd(List<NewsEntry> news) {
-        mNews.addAll(mNews);
+        if (mNews == null) {
+            mNews = news;
+        } else {
+            mNews.addAll(mNews);
+        }
         notifyDataSetChanged();
     }
 
     void addNewsToFront(List<NewsEntry> news) {
-        news.addAll(mNews);
-        mNews = news;
-        notifyDataSetChanged();
+        HashMap<String, Boolean> hashMap = new HashMap<>();
+        for (NewsEntry newsEntry: mNews)
+            hashMap.put(newsEntry.getNewsId(), true);
+        List<NewsEntry> newsToUpdate = new ArrayList<>();
+        for (NewsEntry newsEntry: news) if (!hashMap.containsKey(newsEntry.getNewsId()))
+            newsToUpdate.add(newsEntry);
+        if (newsToUpdate.size() > 0) {
+            newsToUpdate.addAll(mNews);
+            mNews = newsToUpdate;
+            notifyDataSetChanged();
+        }
     }
 
     @Override

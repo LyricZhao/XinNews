@@ -3,9 +3,11 @@ package com.example.xinnews;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,10 +30,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final static String LOG_TAG = "MainActivity";
     private String currentCategory = null;
     private NewsListAdapter mNewsListAdapter;
+    public static final int REQUEST_CODE = 701;
+    private Handler UIHandler;
 
     NavigationView navigationView;
     Menu navigationMenu;
     boolean[] openedCategory = new boolean[Constants.allCategoriesCount];
+    private List<NewsEntry> tempNewsList;
+
+    Runnable setNewsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mNewsListAdapter.setNews(tempNewsList);
+        }
+    };
 
     @Override
     public Context getApplicationContext() {
@@ -40,7 +52,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Bridge.setSystemCacheDir(getApplicationContext().getCacheDir());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -52,10 +63,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         loadCategoryPreferences();
 
         mRecyclerView = findViewById(R.id.recyclerview);
-        mNewsListAdapter = new NewsListAdapter(this);
+        mNewsListAdapter = new NewsListAdapter(this, this);
         mRecyclerView.setAdapter(mNewsListAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        UIHandler = new Handler();
 
+        Bridge.setSystemCacheDir(getApplicationContext().getCacheDir());
         DbBridge.init(getApplication());
         refreshNewsList(Constants.homePage);
     }
@@ -75,7 +88,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         protected Void doInBackground(Void... params) {
             List<NewsEntry> news = DbBridge.getNews(currentCategory);
-            mNewsListAdapter.setNews(news);
+            tempNewsList = news;
+            UIHandler.post(setNewsRunnable);
             return null;
         }
 
@@ -95,6 +109,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     category = null;
                 if (currentCategory.equals(Constants.favorite))
                     return null;
+                if (currentCategory.equals(Constants.recommend))
+                    return Bridge.getRecommendNewsEntryArray(15);
                 return Bridge.getNewsEntryArray(15, null, null, null, category);
             } catch (Exception exception) {
                 Log.e(LOG_TAG, exception.toString());
@@ -196,5 +212,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
         dialog.show();
+    }
+
+    void callNewsPage(Intent intent) {
+        startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.e(LOG_TAG, "changed");
+        if (requestCode == REQUEST_CODE && resultCode == REQUEST_CODE) {
+            boolean changed = false;
+            if (data != null)
+                changed = data.getBooleanExtra("CHANGED", false);
+            if (changed)
+                refreshNewsList(currentCategory);
+        }
     }
 }
