@@ -85,6 +85,8 @@ public class NewsPage extends AppCompatActivity {
                 Log.e(LOG_TAG, exception.toString());
             }
         }
+        RecommendEngine.pushViewedNews(newsEntry);
+        RecommendEngine.printStatus();
     }
 
     @Override

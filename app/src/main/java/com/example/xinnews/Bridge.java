@@ -63,8 +63,13 @@ public class Bridge {
         return imageUris;
     }
 
-    public static ArrayList<NewsEntry> getRecommendNewsEntryArray(int size) {
+    public static ArrayList<NewsEntry> getRecommendNewsEntryArray(int size) throws Exception {
+        if (!RecommendEngine.hasViewedNews())
+            return getNewsEntryArray(size, null, null, null, null);
         ArrayList<NewsEntry> recommendNews = new ArrayList<>();
+        ArrayList<String> topKeywords = RecommendEngine.getTopKeywords();
+        for (String keyword: topKeywords)
+            recommendNews.addAll(getNewsEntryArray(size, null, null, keyword, null));
         return recommendNews;
     }
 
