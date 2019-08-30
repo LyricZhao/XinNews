@@ -25,13 +25,6 @@ public class Bridge {
         systemCacheDir = path;
     }
 
-    static boolean isLegalCategory(String category) {
-        for (String availableCategory: availableCategories)
-            if (availableCategory.equals(category))
-                return true;
-        return false;
-    }
-
     private static String getUrlContent(String urlAddress) throws Exception {
         URL url = new URL(urlAddress);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(url.openStream(), encoding));
@@ -64,10 +57,10 @@ public class Bridge {
     }
 
     public static ArrayList<NewsEntry> getRecommendNewsEntryArray(int size) throws Exception {
-        if (!RecommendEngine.hasViewedNews())
+        if (!BehaviorTracer.hasViewedNews())
             return getNewsEntryArray(size, null, null, null, null);
         ArrayList<NewsEntry> recommendNews = new ArrayList<>();
-        ArrayList<String> topKeywords = RecommendEngine.getTopKeywords();
+        ArrayList<String> topKeywords = BehaviorTracer.getTopKeywords();
         for (String keyword: topKeywords)
             recommendNews.addAll(getNewsEntryArray(size, null, null, keyword, null));
         return recommendNews;

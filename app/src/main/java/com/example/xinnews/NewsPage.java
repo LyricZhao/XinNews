@@ -3,9 +3,7 @@ package com.example.xinnews;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.os.AsyncTask;
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -85,8 +83,8 @@ public class NewsPage extends AppCompatActivity {
                 Log.e(LOG_TAG, exception.toString());
             }
         }
-        RecommendEngine.pushViewedNews(newsEntry);
-        RecommendEngine.printStatus();
+        BehaviorTracer.pushViewedNews(newsEntry);
+        BehaviorTracer.printStatus();
     }
 
     @Override

@@ -6,7 +6,7 @@ import org.json.JSONArray;
 
 import java.util.*;
 
-public class RecommendEngine {
+public class BehaviorTracer {
 
     private static class Keyword {
         String word;
@@ -23,6 +23,7 @@ public class RecommendEngine {
     private static final int KEYWORD_LIMIT = 80;
     private static final int TOP_CUT = 2;
     private static Random random = new Random();
+    private static ArrayList<String> searchHistory = new ArrayList<>();
 
     public static boolean hasViewedNews() {
         return newsViewedCount > 0;
@@ -74,5 +75,13 @@ public class RecommendEngine {
     public static void printStatus() {
         for (Keyword keyword: keywordsHeap)
             Log.d(LOG_TAG, keyword.word + ": " + String.valueOf(keyword.score));
+    }
+
+    public static void addSearchHistory(String keyword) {
+        searchHistory.add(keyword);
+    }
+
+    public static ArrayList<String> getSearchHistory() {
+        return searchHistory;
     }
 }
