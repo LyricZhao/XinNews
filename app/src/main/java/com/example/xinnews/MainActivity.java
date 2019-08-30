@@ -1,7 +1,6 @@
 package com.example.xinnews;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -15,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.xinnews.database.NewsEntry;
@@ -26,7 +24,6 @@ import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-    private NewsViewModel mNewsViewModel;
     private RecyclerView mRecyclerView;
     private final static String LOG_TAG = "MainActivity";
     private String currentCategory = null;
@@ -59,8 +56,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mRecyclerView.setAdapter(mNewsListAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        mNewsViewModel = ViewModelProviders.of(this).get(NewsViewModel.class);
-
+        DbBridge.init(getApplication());
         refreshNewsList(Constants.homePage);
     }
 
@@ -78,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected Void doInBackground(Void... params) {
-            List<NewsEntry> news = mNewsViewModel.getNewsForCategory(currentCategory);
+            List<NewsEntry> news = DbBridge.getNews(currentCategory);
             mNewsListAdapter.setNews(news);
             return null;
         }
@@ -97,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 String category = currentCategory;
                 if (currentCategory.equals(Constants.homePage))
                     category = null;
+                if (currentCategory.equals(Constants.favorite))
+                    return null;
                 return Bridge.getNewsEntryArray(15, null, null, null, category);
             } catch (Exception exception) {
                 Log.e(LOG_TAG, exception.toString());
@@ -106,9 +104,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected void onPostExecute(ArrayList<NewsEntry> result) {
+            if (result == null)
+                return;
             mNewsListAdapter.addNewsToFront(result);
             for (NewsEntry newsEntry: result)
-                mNewsViewModel.insert(newsEntry);
+                DbBridge.insert(newsEntry);
         }
     }
 

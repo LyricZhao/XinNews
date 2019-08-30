@@ -1,9 +1,6 @@
 package com.example.xinnews.database;
 
-import androidx.room.Dao;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
-import androidx.room.Query;
+import androidx.room.*;
 
 import java.util.List;
 
@@ -21,4 +18,10 @@ public interface NewsDao {
 
     @Query("SELECT * FROM news_table WHERE category LIKE :category")
     List<NewsEntry> getNewsForCategory(String category);
+
+    @Query("SELECT * FROM news_table WHERE favorite = 1")
+    List<NewsEntry> getFavoriteNews();
+
+    @Update
+    void update(NewsEntry... newsEntries);
 }

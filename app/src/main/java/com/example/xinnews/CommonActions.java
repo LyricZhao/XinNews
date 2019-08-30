@@ -3,7 +3,6 @@ package com.example.xinnews;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 import com.example.xinnews.database.NewsEntry;
 
 import java.util.ArrayList;
@@ -31,7 +30,9 @@ public class CommonActions {
         context.startActivity(shareIntent);
     }
 
-    public static void favorite(NewsEntry newsEntry) {
-
+    public static boolean favorite(NewsEntry newsEntry) {
+        boolean isFavorite = newsEntry.changeFavorite();
+        DbBridge.update(newsEntry);
+        return isFavorite;
     }
 }

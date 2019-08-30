@@ -110,6 +110,11 @@ public class NewsEntry implements Parcelable {
         return newsId;
     }
 
+    public boolean changeFavorite() {
+        favorite = !favorite;
+        return favorite;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -144,6 +149,10 @@ public class NewsEntry implements Parcelable {
 
     public String getCategory() {
         return category;
+    }
+
+    public boolean getFavorite() {
+        return favorite;
     }
 
     public int getImageCount() {
