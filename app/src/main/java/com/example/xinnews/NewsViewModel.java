@@ -22,6 +22,8 @@ public class NewsViewModel extends AndroidViewModel {
     }
 
     public List<NewsEntry> getNewsForCategory(String category) {
+        if (category.equals(Constants.homePage))
+            return newsDao.getAllNews();
         return newsDao.getNewsForCategory(category);
     }
 

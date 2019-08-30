@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mNewsViewModel = ViewModelProviders.of(this).get(NewsViewModel.class);
 
-        refreshNewsList(Constants.categories[0]);
+        refreshNewsList(Constants.homePage);
     }
 
     /* Policy for loading news:
@@ -86,7 +86,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         protected ArrayList<NewsEntry> doInBackground(Void... params) {
             try {
-                return Bridge.getNewsEntryArray(15, null, null, null, currentCategory);
+                String category = currentCategory;
+                if (currentCategory.equals(Constants.homePage))
+                    category = null;
+                return Bridge.getNewsEntryArray(15, null, null, null, category);
             } catch (Exception exception) {
                 Log.e(LOG_TAG, exception.toString());
             }
