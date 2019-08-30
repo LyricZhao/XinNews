@@ -42,4 +42,6 @@
     <string name="main_search_button">搜索</string>
     <string name="nav_search">搜索</string>
     <string name="search_hint">请输入搜索内容</string>
+    <string name="search_cancel_button">取消</string>
+    <string name="search_confirm_button">确认</string>
 </resources>
