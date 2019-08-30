@@ -1,6 +1,7 @@
 package com.example.xinnews;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,9 +9,17 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -128,6 +137,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    private class loadSearchNewsFromNetwork extends AsyncTask<String, Void, ArrayList<NewsEntry>> {
+
+        @Override
+        protected ArrayList<NewsEntry> doInBackground(String... params) {
+            try {
+                String keyword = params[0];
+                return Bridge.getNewsEntryArray(30, null, null, keyword, null);
+            } catch (Exception exception) {
+                Log.e(LOG_TAG, exception.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<NewsEntry> result) {
+            if (result == null)
+                return;
+            tempNewsList = result;
+            UIHandler.post(setNewsRunnable);
+            for (NewsEntry newsEntry: result)
+                DbBridge.insert(newsEntry);
+        }
+    }
+
     private void loadCategoryPreferences() {
         SharedPreferences categories = getSharedPreferences("categories", Context.MODE_PRIVATE);
         if (!categories.contains("CREATED")) {
@@ -183,9 +216,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             showCategorySectionDialog();
             return false;
         } else if (title.equals(Constants.search)) {
-            // TODO: decide whether return true
             callSearchPage();
-            return true;
+            return false;
         } else {
             refreshNewsList(title);
             DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
@@ -215,7 +247,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     void callSearchPage() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
+        View view = inflater.inflate(R.layout.search_dialog, null);
+        final Button confirmButton = view.findViewById(R.id.search_confirm_button);
+        final Button cancelButton = view.findViewById(R.id.search_cancel_button);
+        final ListView listView = view.findViewById(R.id.search_history_list);
+        final EditText editText = view.findViewById(R.id.search_edit_text);
 
+        ArrayList<String> history = BehaviorTracer.getSearchHistory();
+        if (history.size() == 0) {
+            history = new ArrayList<>();
+            history.add("无历史记录");
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, history);
+        listView.setAdapter(adapter);
+
+        final Dialog searchDialog = builder.create();
+        searchDialog.show();
+        searchDialog.getWindow().setContentView(view);
+        confirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String input = editText.getText().toString();
+                if (input.length() > 0) {
+                    String keyword = editText.getText().toString();
+                    new loadSearchNewsFromNetwork().execute(keyword);
+                    searchDialog.dismiss();
+                    navigationMenu.getItem(Constants.searchId).setChecked(true);
+                    DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    BehaviorTracer.addSearchHistory(keyword);
+                }
+            }
+        });
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchDialog.dismiss();
+            }
+        });
     }
 
     void callNewsPage(Intent intent) {
