@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
@@ -24,6 +23,7 @@ public class NewsPage extends AppCompatActivity {
     private HorizontalScrollView mHorizontalScrollView;
     private boolean favoriteChanged = false;
     private boolean previousViewed;
+    private Intent resultIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +59,8 @@ public class NewsPage extends AppCompatActivity {
                         mFavoriteButton.setText(R.string.button_cancel_favorite);
                     else
                         mFavoriteButton.setText(R.string.button_favorite);
-                    if (!favoriteChanged && previousViewed) {
+                    if (!favoriteChanged) {
                         favoriteChanged = true;
-                        Intent resultIntent = new Intent();
                         resultIntent.putExtra("CHANGED", true);
                         resultIntent.putExtra("FAVORITE", favorite);
                         setResult(MainActivity.REQUEST_CODE, resultIntent);
@@ -85,8 +84,8 @@ public class NewsPage extends AppCompatActivity {
         BehaviorTracer.pushViewedNews(newsEntry);
 //        BehaviorTracer.printReadingTread();
 
+        resultIntent = new Intent();
         if (!previousViewed) {
-            Intent resultIntent = new Intent();
             resultIntent.putExtra("CHANGED", true);
             resultIntent.putExtra("VIEWED", true);
             setResult(MainActivity.REQUEST_CODE, resultIntent);
