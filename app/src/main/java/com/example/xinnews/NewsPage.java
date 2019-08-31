@@ -20,6 +20,7 @@ public class NewsPage extends AppCompatActivity {
     static private final String LOG_TAG = "NewsPage";
 
     private LinearLayout mLinearLayoutForImages;
+    private HorizontalScrollView mHorizontalScrollView;
     private boolean favoriteChanged = false;
 
     @Override
@@ -69,6 +70,7 @@ public class NewsPage extends AppCompatActivity {
         mFavoriteButton.setOnClickListener(clickHandler);
 
         if (hasImage) {
+            mHorizontalScrollView = findViewById(R.id.images_scroll_view);
             mLinearLayoutForImages = findViewById(R.id.linear_layout_for_images);
             try {
                 LoadImageTask loadImageTask = new LoadImageTask();
@@ -109,11 +111,21 @@ public class NewsPage extends AppCompatActivity {
         protected ArrayList<Bitmap> doInBackground(ImageRequestWrapper... imageRequestWrappers) {
             String newsId = imageRequestWrappers[0].newsId;
             ArrayList<String> paths = imageRequestWrappers[0].paths;
-            return PicsCache.getBitmaps(newsId, paths);
+            try {
+                return PicsCache.getBitmaps(newsId, paths);
+            } catch (Exception exception) {
+                Log.e(LOG_TAG, exception.toString());
+            }
+            return null;
         }
 
         @Override
         protected void onPostExecute(ArrayList<Bitmap> results) {
+            if (results == null) {
+                Toast.makeText(getApplicationContext(), "图片加载失败", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            mHorizontalScrollView.setVisibility(View.VISIBLE);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
             for (Bitmap bitmap: results) {
                 ImageView imageView = new ImageView(getApplicationContext());

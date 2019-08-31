@@ -15,10 +15,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -88,6 +85,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         new loadNewsFromDb().execute();
     }
 
+    private void postErrorAndFinishRefresh() {
+        UIHandler.post(() -> {
+            Toast.makeText(MainActivity.this, "网络或文件系统错误", Toast.LENGTH_SHORT).show();
+            mRefreshLayout.finishRefresh();
+        });
+    }
+
     @SuppressLint("StaticFieldLeak")
     private class loadNewsFromDb extends AsyncTask<Void, Void, Void> {
 
@@ -133,6 +137,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected void onPostExecute(ArrayList<NewsEntry> result) {
+            if (result == null) {
+                postErrorAndFinishRefresh();
+                return;
+            }
             UIHandler.post(() -> {
                 mNewsListAdapter.addNewsToFront(result);
                 mRefreshLayout.finishRefresh();
@@ -164,6 +172,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected void onPostExecute(ArrayList<NewsEntry> result) {
+            if (result == null) {
+                postErrorAndFinishRefresh();
+                return;
+            }
             UIHandler.post(() -> {
                 mNewsListAdapter.addNewsToEnd(result);
                 mRefreshLayout.finishLoadMore();
@@ -189,6 +201,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected void onPostExecute(ArrayList<NewsEntry> result) {
+            if (result == null) {
+                postErrorAndFinishRefresh();
+                return;
+            }
             UIHandler.post(() -> mNewsListAdapter.setNews(result));
             for (NewsEntry newsEntry: result)
                 DbBridge.insert(newsEntry);

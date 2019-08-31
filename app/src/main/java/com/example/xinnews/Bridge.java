@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 
 public class Bridge {
@@ -19,6 +20,7 @@ public class Bridge {
     static private final String BASE_URL = "https://api2.newsminer.net/svc/news/queryNewsList";
     static private final String ENCODING = "UTF-8";
     static private final String PROVIDER_AUTHORITY = BuildConfig.APPLICATION_ID + ".provider";
+    static private final int TIME_OUT = 2500;
 
     static private File systemCacheDir = null;
 
@@ -28,7 +30,10 @@ public class Bridge {
 
     static private String getUrlContent(String urlAddress) throws Exception {
         URL url = new URL(urlAddress);
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(url.openStream(), ENCODING));
+        URLConnection connection = url.openConnection();
+        connection.setConnectTimeout(TIME_OUT);
+        connection.setReadTimeout(TIME_OUT);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), ENCODING));
         String incoming;
         StringBuilder result = new StringBuilder();
         while ((incoming = bufferedReader.readLine()) != null)

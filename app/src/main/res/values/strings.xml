@@ -44,4 +44,5 @@
     <string name="search_hint">请输入搜索内容</string>
     <string name="search_cancel_button">取消</string>
     <string name="search_confirm_button">确认</string>
+    <string name="no_news">这里还没有新闻</string>
 </resources>

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,16 +25,19 @@ import java.util.List;
 public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsViewHolder> {
     static private final int WITH_IMAGE = 0;
     static private final int WITHOUT_IMAGE = 1;
+    static private final int EMPTY_VIEW = 2;
 
     private Context mContext;
     private final LayoutInflater mInflater;
     private List<NewsEntry> mNews = new ArrayList<>();
     private MainActivity mParent;
+    private Bitmap mLogo;
 
     NewsListAdapter(Context context, MainActivity parentActivity) {
         mContext = context;
         mInflater = LayoutInflater.from(context);
         mParent = parentActivity;
+        mLogo = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.logo);
     }
 
     @NonNull
@@ -42,8 +46,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         View itemView;
         if (viewType == WITH_IMAGE) {
             itemView = mInflater.inflate(R.layout.news_card, parent, false);
-        } else {
+        } else if (viewType == WITHOUT_IMAGE){
             itemView = mInflater.inflate(R.layout.news_card_without_image, parent, false);
+        } else {
+            itemView = mInflater.inflate(R.layout.no_data, parent, false);
         }
         return new NewsViewHolder(itemView);
     }
@@ -51,6 +57,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
     // TODO: empty news
     @Override
     public void onBindViewHolder(NewsViewHolder holder, int position) {
+        if (mNews.size() == 0)
+            return;
         final NewsEntry current = mNews.get(position);
         holder.setView(current);
 
@@ -63,6 +71,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
 
     @Override
     public int getItemViewType(int position) {
+        if (mNews.size() == 0)
+            return EMPTY_VIEW;
         return mNews.get(position).hasImage() ? WITH_IMAGE : WITHOUT_IMAGE;
     }
 
@@ -99,14 +109,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
     }
 
     int getNextPage() {
-        return getItemCount() / Utility.pageSize + 1;
+        return mNews.size() / Utility.pageSize + 1;
     }
 
     @Override
     public int getItemCount() {
-        if (mNews != null)
-            return mNews.size();
-        return 0;
+        return Math.max(mNews.size(), 1);
     }
 
     class NewsViewHolder extends RecyclerView.ViewHolder {
@@ -143,12 +151,18 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
             @Override
             protected Bitmap doInBackground(String... strings) {
                 String newsId = strings[0], coverImagePath = strings[1];
-                return PicsCache.getCoverBitmap(newsId, coverImagePath);
+                try {
+                    return PicsCache.getCoverBitmap(newsId, coverImagePath);
+                } catch (Exception exception) {
+                    Log.e(LOG_TAG, exception.toString());
+                }
+                return null;
             }
 
             @Override
             protected void onPostExecute(Bitmap bitmap) {
-                cardThumbnailView.setImageBitmap(bitmap);
+                if (bitmap != null)
+                    cardThumbnailView.setImageBitmap(bitmap);
             }
         }
 
@@ -156,15 +170,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
             cardTitleView.setText(news.getTitle());
             cardCategoryView.setText(news.getCategory());
             cardTimeView.setText(news.getPublishTime());
-            Log.e(LOG_TAG, news.getTitle());
-            Log.e(LOG_TAG, news.toString());
-            Log.e(LOG_TAG, "Setting view, bitmap size");
             if (news.hasImage()) {
+                cardThumbnailView.setImageBitmap(mLogo);
                 try {
                     DownloadTask downloadTask = new DownloadTask();
                     downloadTask.execute(news.getNewsId(), news.getCoverImagePath());
                 } catch (Exception exception) {
-                    // TODO: download failed
                     Log.e(LOG_TAG, exception.toString());
                 }
             }

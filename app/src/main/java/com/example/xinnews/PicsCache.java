@@ -10,21 +10,16 @@ class PicsCache {
     static private HashMap<String, Bitmap> hashMap = new HashMap<>();
     static private final String LOG_TAG = "PicsCache";
 
-    static private Bitmap find(String tag, String path) {
+    static private Bitmap find(String tag, String path) throws Exception {
         Bitmap bitmap = hashMap.get(tag);
         if (bitmap == null) {
-            try {
-                hashMap.put(tag, Bridge.loadResourceFromPath(tag, path));
-                bitmap = hashMap.get(tag);
-            } catch (Exception exception) {
-                exception.printStackTrace();
-                return null;
-            }
+            hashMap.put(tag, Bridge.loadResourceFromPath(tag, path));
+            bitmap = hashMap.get(tag);
         }
         return bitmap;
     }
 
-    static ArrayList<Bitmap> getBitmaps(String newsId, ArrayList<String> paths) {
+    static ArrayList<Bitmap> getBitmaps(String newsId, ArrayList<String> paths) throws Exception {
         ArrayList<Bitmap> bitmaps = new ArrayList<>();
         for (int i = 0; i < paths.size(); ++ i) {
             String tag = Utility.tagger(newsId, i);
@@ -33,7 +28,7 @@ class PicsCache {
         return bitmaps;
     }
 
-    static Bitmap getCoverBitmap(String newsId, String path) {
+    static Bitmap getCoverBitmap(String newsId, String path) throws Exception {
         return find(Utility.tagger(newsId, 0), path);
     }
 }
