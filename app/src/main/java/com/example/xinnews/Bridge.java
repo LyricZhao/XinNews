@@ -56,13 +56,16 @@ public class Bridge {
         return imageUris;
     }
 
-    public static ArrayList<NewsEntry> getRecommendNewsEntryArray(int size) throws Exception {
+    public static ArrayList<NewsEntry> getRecommendNewsEntryArray(int size, int page) throws Exception {
         if (!BehaviorTracer.hasViewedNews())
-            return getNewsEntryArray(size, null, null, null, null);
+            return getNewsEntryArray(size, null, Constants.getCurrentDate(), null, null, page);
+
         ArrayList<NewsEntry> recommendNews = new ArrayList<>();
-        ArrayList<String> topKeywords = BehaviorTracer.getTopKeywords();
+        ArrayList<String> topKeywords;
+        if (page == 1) topKeywords = BehaviorTracer.getTopKeywords();
+        else topKeywords = BehaviorTracer.getTopKeywordsLastTime();
         for (String keyword: topKeywords)
-            recommendNews.addAll(getNewsEntryArray(size, null, null, keyword, null));
+            recommendNews.addAll(getNewsEntryArray(size / BehaviorTracer.keywordTopics, null, Constants.getCurrentDate(), keyword, null, page));
         return recommendNews;
     }
 
@@ -119,7 +122,7 @@ public class Bridge {
         return bitmap;
     }
 
-    private static JSONArray getNewsJsonArray(int size, String startDate, String endDate, String words, String categories) throws Exception {
+    private static JSONArray getNewsJsonArray(int size, String startDate, String endDate, String words, String categories, int page) throws Exception {
         if (size == 0) size = defaultCrawlSize;
         StringBuilder queryUrl = new StringBuilder(baseUrl + "?");
         queryUrl.append("size=").append(size);
@@ -127,18 +130,19 @@ public class Bridge {
         if (endDate != null) queryUrl.append("&endDate=").append(endDate);
         if (words != null) queryUrl.append("&words=").append(words);
         if (categories != null) queryUrl.append("&categories=").append(categories);
+        queryUrl.append("&page=").append(page);
         Log.d(LOG_TAG, "Querying url is " + queryUrl.toString());
         String jsonContent = getUrlContent(queryUrl.toString());
         JSONObject globalContent = new JSONObject(jsonContent);
         return globalContent.getJSONArray("data");
     }
 
-    public static ArrayList<NewsEntry> getNewsEntryArray(int size, String startDate, String endDate, String words, String categories) throws Exception {
-        JSONArray jsonArray = getNewsJsonArray(size, startDate, endDate, words, categories);
+    public static ArrayList<NewsEntry> getNewsEntryArray(int size, String startDate, String endDate, String words, String categories, int page) throws Exception {
+        JSONArray jsonArray = getNewsJsonArray(size, startDate, endDate, words, categories, page);
         ArrayList<NewsEntry> entries = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); ++ i) {
-//            Log.d(LOG_TAG, jsonArray.getJSONObject(i).toString());
-            entries.add(new NewsEntry(jsonArray.getJSONObject(i)));
+            NewsEntry newsEntry = new NewsEntry(jsonArray.getJSONObject(i));
+            entries.add(newsEntry);
         }
 
         return entries;

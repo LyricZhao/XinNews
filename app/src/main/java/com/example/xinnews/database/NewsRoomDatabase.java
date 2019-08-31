@@ -54,19 +54,6 @@ public abstract class NewsRoomDatabase extends RoomDatabase {
         protected Void doInBackground(final Void... params) {
             // TODO: refresh the news list when start the app
             mDao.deleteAll();
-
-            try {
-                Log.d(LOG_TAG, "Loading news ...");
-                ArrayList<NewsEntry> newsEntries = Bridge.getNewsEntryArray(15, null, null, null, "科技");
-                for (NewsEntry newsEntry: newsEntries) {
-                    mDao.insert(newsEntry);
-                }
-                Log.d(LOG_TAG, "Find " + newsEntries.size() + " news.");
-            } catch (Exception exception) {
-                // TODO: handle the exception
-                Log.e(LOG_TAG, exception.toString());
-            }
-
             return null;
         }
     }

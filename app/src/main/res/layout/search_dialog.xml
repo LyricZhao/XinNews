@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_margin="8dp"
+              xmlns:tools="http://schemas.android.com/tools" android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
@@ -11,24 +10,28 @@
             android:inputType="textPersonName"
             android:hint="@string/search_hint"
             android:ems="10"
-            android:id="@+id/search_edit_text"/>
+            android:layout_margin="8dp"
+            android:id="@+id/search_edit_text" android:autofillHints=""/>
     <ListView
             android:id="@+id/search_history_list"
             android:layout_width="match_parent"
+            android:layout_margin="8dp"
             android:layout_height="300dp" android:scrollbars="vertical"/>
     <LinearLayout
             android:orientation="horizontal"
+            android:layout_margin="8dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
         <Button
                 android:text="@string/search_cancel_button"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
-                android:layout_height="wrap_content" android:id="@+id/search_cancel_button"/>
+                android:layout_height="wrap_content" android:id="@+id/search_cancel_button" tools:ignore="ButtonStyle"/>
         <Button
                 android:text="@string/search_confirm_button"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
-                android:layout_height="wrap_content" android:id="@+id/search_confirm_button"/>
+                android:layout_height="wrap_content" android:id="@+id/search_confirm_button"
+                tools:ignore="ButtonStyle"/>
     </LinearLayout>
 </LinearLayout>

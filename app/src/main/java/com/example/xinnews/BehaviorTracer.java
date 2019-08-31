@@ -22,8 +22,10 @@ public class BehaviorTracer {
     private static List<Keyword> keywordsHeap = new ArrayList<>();
     private static final int KEYWORD_LIMIT = 80;
     private static final int TOP_CUT = 2;
+    public static final int keywordTopics = TOP_CUT + 1;
     private static Random random = new Random();
     private static ArrayList<String> searchHistory = new ArrayList<>();
+    private static ArrayList<String> topKeywordsLastTime;
 
     public static boolean hasViewedNews() {
         return newsViewedCount > 0;
@@ -69,7 +71,12 @@ public class BehaviorTracer {
             int pos = random.nextInt(keywordsHeap.size() - topCut) + topCut;
             topKeywords.add(keywordsHeap.get(pos).word);
         }
+        topKeywordsLastTime = topKeywords;
         return topKeywords;
+    }
+
+    public static ArrayList<String> getTopKeywordsLastTime() {
+        return topKeywordsLastTime;
     }
 
     public static void printStatus() {
@@ -78,7 +85,7 @@ public class BehaviorTracer {
     }
 
     public static void addSearchHistory(String keyword) {
-        searchHistory.add(keyword);
+        searchHistory.add(0, keyword);
     }
 
     public static ArrayList<String> getSearchHistory() {

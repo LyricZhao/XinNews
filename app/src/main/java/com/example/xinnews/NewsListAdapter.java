@@ -81,15 +81,19 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
     }
 
     void addNewsToEnd(List<NewsEntry> news) {
+        if (news == null)
+            return;
         if (mNews == null) {
             mNews = news;
         } else {
-            mNews.addAll(mNews);
+            mNews.addAll(news);
         }
         notifyDataSetChanged();
     }
 
     void addNewsToFront(List<NewsEntry> news) {
+        if (news == null)
+            return;
         HashMap<String, Boolean> hashMap = new HashMap<>();
         for (NewsEntry newsEntry: mNews)
             hashMap.put(newsEntry.getNewsId(), true);
@@ -101,6 +105,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
             mNews = newsToUpdate;
             notifyDataSetChanged();
         }
+    }
+
+    public int getNextPage() {
+        return getItemCount() / Constants.pageSize + 1;
     }
 
     @Override

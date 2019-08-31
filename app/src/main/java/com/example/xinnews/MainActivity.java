@@ -9,8 +9,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,6 +27,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.xinnews.database.NewsEntry;
 import com.google.android.material.navigation.NavigationView;
+import com.scwang.smartrefresh.header.MaterialHeader;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,18 +43,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NewsListAdapter mNewsListAdapter;
     public static final int REQUEST_CODE = 701;
     private Handler UIHandler;
+    RefreshLayout mRefreshLayout;
 
     NavigationView navigationView;
     Menu navigationMenu;
     boolean[] openedCategory = new boolean[Constants.allCategoriesCount];
-    private List<NewsEntry> tempNewsList;
-
-    Runnable setNewsRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mNewsListAdapter.setNews(tempNewsList);
-        }
-    };
 
     @Override
     public Context getApplicationContext() {
@@ -80,6 +75,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Bridge.setSystemCacheDir(getApplicationContext().getCacheDir());
         DbBridge.init(getApplication());
         refreshNewsList(Constants.homePage);
+
+        mRefreshLayout = findViewById(R.id.refresh_layout);
+        mRefreshLayout.setEnableRefresh(true);
+        mRefreshLayout.setEnableLoadMore(true);
+        mRefreshLayout.setRefreshHeader(new MaterialHeader(this));
+        mRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
+            @Override
+            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
+                new loadNewsFromNetwork().execute();
+            }
+        });
+        mRefreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
+            @Override
+            public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
+                new loadMoreNewsFromNetwork().execute();
+            }
+        });
     }
 
     /* Policy for loading news:
@@ -97,8 +109,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         protected Void doInBackground(Void... params) {
             List<NewsEntry> news = DbBridge.getNews(currentCategory);
-            tempNewsList = news;
-            UIHandler.post(setNewsRunnable);
+            UIHandler.post(() -> mNewsListAdapter.setNews(news));
             return null;
         }
 
@@ -119,8 +130,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (currentCategory.equals(Constants.favorite))
                     return null;
                 if (currentCategory.equals(Constants.recommend))
-                    return Bridge.getRecommendNewsEntryArray(15);
-                return Bridge.getNewsEntryArray(15, null, null, null, category);
+                    return Bridge.getRecommendNewsEntryArray(Constants.pageSize, 1);
+                return Bridge.getNewsEntryArray(Constants.pageSize, null, Constants.getCurrentDate(), null, category, 1);
             } catch (Exception exception) {
                 Log.e(LOG_TAG, exception.toString());
             }
@@ -129,9 +140,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected void onPostExecute(ArrayList<NewsEntry> result) {
+            UIHandler.post(() -> {
+                mNewsListAdapter.addNewsToFront(result);
+                mRefreshLayout.finishRefresh();
+            });
             if (result == null)
                 return;
-            mNewsListAdapter.addNewsToFront(result);
+            for (NewsEntry newsEntry: result)
+                DbBridge.insert(newsEntry);
+        }
+    }
+
+    private class loadMoreNewsFromNetwork extends AsyncTask<Void, Void, ArrayList<NewsEntry>> {
+
+        @Override
+        protected ArrayList<NewsEntry> doInBackground(Void... params) {
+            try {
+                String category = currentCategory;
+                if (currentCategory.equals(Constants.homePage))
+                    category = null;
+                if (currentCategory.equals(Constants.favorite))
+                    return null;
+                if (currentCategory.equals(Constants.recommend))
+                    return Bridge.getRecommendNewsEntryArray(Constants.pageSize, mNewsListAdapter.getNextPage());
+                return Bridge.getNewsEntryArray(Constants.pageSize, null, Constants.getCurrentDate(), null, category, mNewsListAdapter.getNextPage());
+            } catch (Exception exception) {
+                Log.e(LOG_TAG, exception.toString());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<NewsEntry> result) {
+            UIHandler.post(() -> {
+                mNewsListAdapter.addNewsToEnd(result);
+                mRefreshLayout.finishLoadMore();
+            });
+            if (result == null)
+                return;
             for (NewsEntry newsEntry: result)
                 DbBridge.insert(newsEntry);
         }
@@ -143,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         protected ArrayList<NewsEntry> doInBackground(String... params) {
             try {
                 String keyword = params[0];
-                return Bridge.getNewsEntryArray(30, null, null, keyword, null);
+                return Bridge.getNewsEntryArray(30, null, null, keyword, null, 1);
             } catch (Exception exception) {
                 Log.e(LOG_TAG, exception.toString());
             }
@@ -154,8 +200,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         protected void onPostExecute(ArrayList<NewsEntry> result) {
             if (result == null)
                 return;
-            tempNewsList = result;
-            UIHandler.post(setNewsRunnable);
+            UIHandler.post(() -> mNewsListAdapter.setNews(result));
             for (NewsEntry newsEntry: result)
                 DbBridge.insert(newsEntry);
         }

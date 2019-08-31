@@ -11,7 +11,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -239,5 +241,13 @@ public class NewsEntry implements Parcelable {
 
     public String getShareContent() {
         return String.format(shareFormat, title, getBriefContent(), publishTime, publisher, link);
+    }
+
+    public boolean isDateValid() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
+        simpleDateFormat.applyPattern("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date();
+        String currentTime = simpleDateFormat.format(date);
+        return publishTime.compareTo(currentTime) < 0;
     }
 }
