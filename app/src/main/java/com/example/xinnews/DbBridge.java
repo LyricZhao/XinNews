@@ -2,7 +2,6 @@ package com.example.xinnews;
 
 import android.app.Application;
 import android.os.AsyncTask;
-import android.util.Log;
 import com.example.xinnews.database.NewsDao;
 import com.example.xinnews.database.NewsEntry;
 import com.example.xinnews.database.NewsRoomDatabase;
@@ -10,29 +9,31 @@ import com.example.xinnews.database.NewsRoomDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DbBridge {
-    private static NewsDao newsDao;
-    private static final String LOG_TAG = "DbBridge";
+class DbBridge {
+    static private NewsDao newsDao;
+    static private final String LOG_TAG = "DbBridge";
 
-    public static void init(Application application) {
+    static void init(Application application) {
         newsDao = NewsRoomDatabase.getDatabase(application).newsDao();
     }
 
-    public static void insert(NewsEntry news) {
+    static void insert(NewsEntry news) {
         new insertSingleAsyncTask(newsDao).execute(news);
     }
 
-    public static void update(NewsEntry news) {
+    static void update(NewsEntry news) {
         new updateSingleAsyncTask(newsDao).execute(news);
     }
 
-    public static List<NewsEntry> getNews(String category) {
-        if (category.equals(Constants.homePage))
+    static List<NewsEntry> getNews(String category) {
+        if (category.equals(Utility.homePage))
             return newsDao.getAllNews();
-        if (category.equals(Constants.favorite))
+        if (category.equals(Utility.favorite))
             return newsDao.getFavoriteNews();
-        if (category.equals(Constants.recommend))
-            return new ArrayList<NewsEntry>();
+        if (category.equals(Utility.recommend))
+            return new ArrayList<>();
+        if (category.equals(Utility.search))
+            return new ArrayList<>();
         return newsDao.getNewsForCategory(category);
     }
 

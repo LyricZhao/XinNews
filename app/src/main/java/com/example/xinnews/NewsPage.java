@@ -16,8 +16,8 @@ import com.example.xinnews.database.NewsEntry;
 import java.util.ArrayList;
 
 public class NewsPage extends AppCompatActivity {
-    public static final String EXTRA_NEWS_INFO = "com.example.xinnews.extra.NEWS_INFO";
-    private static final String LOG_TAG = "NewsPage";
+    static final String EXTRA_NEWS_INFO = BuildConfig.APPLICATION_ID + ".extra.NEWS_INFO";
+    static private final String LOG_TAG = "NewsPage";
 
     private LinearLayout mLinearLayoutForImages;
     private boolean favoriteChanged = false;
@@ -42,33 +42,27 @@ public class NewsPage extends AppCompatActivity {
             mFavoriteButton.setText(R.string.button_cancel_favorite);
 
         mTitleTextView.setText(newsEntry.getTitle());
-        mSubtitleTextView.setText(newsEntry.generateSubtitle());
+        mSubtitleTextView.setText(newsEntry.getSubtitle());
         mContentTextView.setText(newsEntry.getContent());
 
-        View.OnClickListener clickHandler = new View.OnClickListener() {
-            @SuppressLint("Assert")
-            @Override
-            public void onClick(View view) {
-                switch (view.getId()) {
-                    case R.id.news_button_share:
-                        CommonActions.share(newsEntry, getApplicationContext());
-                        break;
-                    case R.id.news_button_favorite:
-                        boolean favorite = CommonActions.favorite(newsEntry);
-                        if (favorite)
-                            mFavoriteButton.setText(R.string.button_cancel_favorite);
-                        else
-                            mFavoriteButton.setText(R.string.button_favorite);
-                        if (!favoriteChanged) {
-                            favoriteChanged = true;
-                            Intent resultIntent = new Intent();
-                            resultIntent.putExtra("CHANGED", true);
-                            setResult(MainActivity.REQUEST_CODE, resultIntent);
-                        }
-                        break;
-                    default:
-                        assert false;
-                }
+        View.OnClickListener clickHandler = view -> {
+            switch (view.getId()) {
+                case R.id.news_button_share:
+                    CommonActions.share(newsEntry, getApplicationContext());
+                    break;
+                case R.id.news_button_favorite:
+                    boolean favorite = CommonActions.favorite(newsEntry);
+                    if (favorite)
+                        mFavoriteButton.setText(R.string.button_cancel_favorite);
+                    else
+                        mFavoriteButton.setText(R.string.button_favorite);
+                    if (!favoriteChanged) {
+                        favoriteChanged = true;
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("CHANGED", true);
+                        setResult(MainActivity.REQUEST_CODE, resultIntent);
+                    }
+                    break;
             }
         };
         mShareButton.setOnClickListener(clickHandler);
@@ -84,7 +78,7 @@ public class NewsPage extends AppCompatActivity {
             }
         }
         BehaviorTracer.pushViewedNews(newsEntry);
-        BehaviorTracer.printStatus();
+//        BehaviorTracer.printReadingTread();
     }
 
     @Override
@@ -98,7 +92,7 @@ public class NewsPage extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class ImageRequestWrapper {
+    static private class ImageRequestWrapper {
         String newsId;
         ArrayList<String> paths;
 
@@ -108,6 +102,7 @@ public class NewsPage extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class LoadImageTask extends AsyncTask<ImageRequestWrapper, Void, ArrayList<Bitmap>> {
 
         @Override

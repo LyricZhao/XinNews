@@ -35,6 +35,7 @@ import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: recommend news twice
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private RecyclerView mRecyclerView;
@@ -47,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     NavigationView navigationView;
     Menu navigationMenu;
-    boolean[] openedCategory = new boolean[Constants.allCategoriesCount];
+    boolean[] openedCategory = new boolean[Utility.allCategoriesCount];
 
     @Override
     public Context getApplicationContext() {
@@ -74,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Bridge.setSystemCacheDir(getApplicationContext().getCacheDir());
         DbBridge.init(getApplication());
-        refreshNewsList(Constants.homePage);
+        refreshNewsList(Utility.homePage);
 
         mRefreshLayout = findViewById(R.id.refresh_layout);
         mRefreshLayout.setEnableRefresh(true);
@@ -125,13 +126,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         protected ArrayList<NewsEntry> doInBackground(Void... params) {
             try {
                 String category = currentCategory;
-                if (currentCategory.equals(Constants.homePage))
+                if (currentCategory.equals(Utility.homePage))
                     category = null;
-                if (currentCategory.equals(Constants.favorite))
+                if (currentCategory.equals(Utility.favorite))
                     return null;
-                if (currentCategory.equals(Constants.recommend))
-                    return Bridge.getRecommendNewsEntryArray(Constants.pageSize, 1);
-                return Bridge.getNewsEntryArray(Constants.pageSize, null, Constants.getCurrentDate(), null, category, 1);
+                if (currentCategory.equals(Utility.recommend))
+                    return Bridge.getRecommendNewsEntryArray(Utility.pageSize, 1);
+                return Bridge.getNewsEntryArray(Utility.pageSize, Utility.getCurrentDate(), null, category, 1);
             } catch (Exception exception) {
                 Log.e(LOG_TAG, exception.toString());
             }
@@ -157,13 +158,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         protected ArrayList<NewsEntry> doInBackground(Void... params) {
             try {
                 String category = currentCategory;
-                if (currentCategory.equals(Constants.homePage))
+                if (currentCategory.equals(Utility.homePage))
                     category = null;
-                if (currentCategory.equals(Constants.favorite))
+                if (currentCategory.equals(Utility.favorite))
                     return null;
-                if (currentCategory.equals(Constants.recommend))
-                    return Bridge.getRecommendNewsEntryArray(Constants.pageSize, mNewsListAdapter.getNextPage());
-                return Bridge.getNewsEntryArray(Constants.pageSize, null, Constants.getCurrentDate(), null, category, mNewsListAdapter.getNextPage());
+                if (currentCategory.equals(Utility.recommend))
+                    return Bridge.getRecommendNewsEntryArray(Utility.pageSize, mNewsListAdapter.getNextPage());
+                return Bridge.getNewsEntryArray(Utility.pageSize, Utility.getCurrentDate(), null, category, mNewsListAdapter.getNextPage());
             } catch (Exception exception) {
                 Log.e(LOG_TAG, exception.toString());
             }
@@ -189,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         protected ArrayList<NewsEntry> doInBackground(String... params) {
             try {
                 String keyword = params[0];
-                return Bridge.getNewsEntryArray(30, null, null, keyword, null, 1);
+                return Bridge.getNewsEntryArray(30, null, keyword, null, 1);
             } catch (Exception exception) {
                 Log.e(LOG_TAG, exception.toString());
             }
@@ -211,29 +212,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!categories.contains("CREATED")) {
             SharedPreferences.Editor editor = categories.edit();
             editor.putBoolean("CREATED", true);
-            for (String category : Constants.categories)
+            for (String category : Utility.categories)
                 editor.putBoolean(category, true);
             editor.apply();
-            for (int i = 0; i < Constants.allCategoriesCount; ++i)
+            for (int i = 0; i < Utility.allCategoriesCount; ++i)
                 openedCategory[i] = true;
         } else {
-            for (int i = 0; i < Constants.allCategoriesCount; ++ i)
-                openedCategory[i] = categories.getBoolean(Constants.categories[i], true);
+            for (int i = 0; i < Utility.allCategoriesCount; ++ i)
+                openedCategory[i] = categories.getBoolean(Utility.categories[i], true);
         }
         navigationMenu.getItem(0).setChecked(true);
-        for (int i = 0; i < Constants.allCategoriesCount; ++ i)
-            navigationMenu.getItem(i + Constants.navigationOffset).setVisible(openedCategory[i]);
+        for (int i = 0; i < Utility.allCategoriesCount; ++ i)
+            navigationMenu.getItem(i + Utility.navigationOffset).setVisible(openedCategory[i]);
     }
 
     private void saveCategoryPreferences() {
         SharedPreferences categories = getSharedPreferences("categories", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = categories.edit();
         editor.putBoolean("CREATED", true);
-        for (int i = 0; i < Constants.allCategoriesCount; ++ i)
-            editor.putBoolean(Constants.categories[i], openedCategory[i]);
+        for (int i = 0; i < Utility.allCategoriesCount; ++ i)
+            editor.putBoolean(Utility.categories[i], openedCategory[i]);
         editor.apply();
-        for (int i = 0; i < Constants.allCategoriesCount; ++ i)
-            navigationMenu.getItem(i + Constants.navigationOffset).setVisible(openedCategory[i]);
+        for (int i = 0; i < Utility.allCategoriesCount; ++ i)
+            navigationMenu.getItem(i + Utility.navigationOffset).setVisible(openedCategory[i]);
     }
 
     @Override
@@ -257,10 +258,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         String title = item.getTitle().toString();
-        if (title.equals(Constants.categorySettings)) {
+        if (title.equals(Utility.categorySettings)) {
             showCategorySectionDialog();
             return false;
-        } else if (title.equals(Constants.search)) {
+        } else if (title.equals(Utility.search)) {
             callSearchPage();
             return false;
         } else {
@@ -272,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void showCategorySectionDialog() {
-        final String[] items = Constants.categories;
+        final String[] items = Utility.categories;
         final boolean choices[] = openedCategory;
         AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
         dialog.setTitle("分类管理");
@@ -319,7 +320,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     String keyword = editText.getText().toString();
                     new loadSearchNewsFromNetwork().execute(keyword);
                     searchDialog.dismiss();
-                    navigationMenu.getItem(Constants.searchId).setChecked(true);
+                    navigationMenu.getItem(Utility.searchId).setChecked(true);
                     DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
                     drawerLayout.closeDrawer(GravityCompat.START);
                     BehaviorTracer.addSearchHistory(keyword);

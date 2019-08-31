@@ -1,5 +1,6 @@
 package com.example.xinnews;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -8,47 +9,42 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.xinnews.database.NewsEntry;
-import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.example.xinnews.NewsListAdapter.NewsItemType.NewsWithImage;
-import static com.example.xinnews.NewsListAdapter.NewsItemType.NewsWithoutImage;
 
 public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsViewHolder> {
-    public static enum NewsItemType {
-        NewsWithImage,
-        NewsWithoutImage
-    }
+    static private final int WITH_IMAGE = 0;
+    static private final int WITHOUT_IMAGE = 1;
 
     private Context mContext;
     private final LayoutInflater mInflater;
-    private List<NewsEntry> mNews;
-    private MainActivity parentActivity;
+    private List<NewsEntry> mNews = new ArrayList<>();
+    private MainActivity mParent;
 
     NewsListAdapter(Context context, MainActivity parentActivity) {
         mContext = context;
         mInflater = LayoutInflater.from(context);
-        this.parentActivity = parentActivity;
+        mParent = parentActivity;
     }
 
+    @NonNull
     @Override
-    public NewsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = null;
-        if (NewsWithImage.ordinal() == viewType) {
+    public NewsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView;
+        if (viewType == WITH_IMAGE) {
             itemView = mInflater.inflate(R.layout.news_card, parent, false);
-        } else if (NewsWithoutImage.ordinal() == viewType) {
+        } else {
             itemView = mInflater.inflate(R.layout.news_card_without_image, parent, false);
         }
-
         return new NewsViewHolder(itemView);
     }
 
@@ -58,42 +54,37 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         final NewsEntry current = mNews.get(position);
         holder.setView(current);
 
-        holder.getCardView().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(mContext, NewsPage.class);
-                intent.putExtra(NewsPage.EXTRA_NEWS_INFO, current);
-                parentActivity.callNewsPage(intent);
-            }
+        holder.getCardView().setOnClickListener(view -> {
+            Intent intent = new Intent(mContext, NewsPage.class);
+            intent.putExtra(NewsPage.EXTRA_NEWS_INFO, current);
+            mParent.callNewsPage(intent);
         });
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (mNews.get(position).hasImage())
-            return NewsWithImage.ordinal();
-        return NewsWithoutImage.ordinal();
+        return mNews.get(position).hasImage() ? WITH_IMAGE : WITHOUT_IMAGE;
     }
 
-    void setNews(List<NewsEntry> news) {
+    void setNews(@NonNull List<NewsEntry> news) {
         mNews = news;
         notifyDataSetChanged();
     }
 
-    void addNewsToEnd(List<NewsEntry> news) {
-        if (news == null)
-            return;
-        if (mNews == null) {
-            mNews = news;
-        } else {
-            mNews.addAll(news);
+    void addNewsToEnd(@NonNull List<NewsEntry> news) {
+        HashMap<String, Boolean> hashMap = new HashMap<>();
+        for (NewsEntry newsEntry: mNews)
+            hashMap.put(newsEntry.getNewsId(), true);
+        boolean updated = false;
+        for (NewsEntry newsEntry: news) if (!hashMap.containsKey(newsEntry.getNewsId())) {
+            mNews.add(newsEntry);
+            updated = true;
         }
-        notifyDataSetChanged();
+        if (updated)
+            notifyDataSetChanged();
     }
 
-    void addNewsToFront(List<NewsEntry> news) {
-        if (news == null)
-            return;
+    void addNewsToFront(@NonNull List<NewsEntry> news) {
         HashMap<String, Boolean> hashMap = new HashMap<>();
         for (NewsEntry newsEntry: mNews)
             hashMap.put(newsEntry.getNewsId(), true);
@@ -107,8 +98,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         }
     }
 
-    public int getNextPage() {
-        return getItemCount() / Constants.pageSize + 1;
+    int getNextPage() {
+        return getItemCount() / Utility.pageSize + 1;
     }
 
     @Override
@@ -147,12 +138,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
             return cardView;
         }
 
+        @SuppressLint("StaticFieldLeak")
         private class DownloadTask extends AsyncTask<String, Void, Bitmap> {
             @Override
             protected Bitmap doInBackground(String... strings) {
                 String newsId = strings[0], coverImagePath = strings[1];
-                Bitmap bitmap = PicsCache.getCoverBitmap(newsId, coverImagePath);
-                return bitmap;
+                return PicsCache.getCoverBitmap(newsId, coverImagePath);
             }
 
             @Override
@@ -173,17 +164,13 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
                     DownloadTask downloadTask = new DownloadTask();
                     downloadTask.execute(news.getNewsId(), news.getCoverImagePath());
                 } catch (Exception exception) {
+                    // TODO: download failed
                     Log.e(LOG_TAG, exception.toString());
                 }
             }
             cardPublisherView.setText(news.getPublisher());
             cardContentView.setText(news.getContent().trim());
-            cardShareButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    CommonActions.share(news, mContext);
-                }
-            });
+            cardShareButton.setOnClickListener(view -> CommonActions.share(news, mContext));
         }
     }
 }

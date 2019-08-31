@@ -11,9 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,9 +19,11 @@ import java.util.regex.Pattern;
 @Entity(tableName = "news_table")
 public class NewsEntry implements Parcelable {
 
-    private static final int BRIEF_MIN_LENGTH = 50;
-    private static final String LOG_TAG = "NewsEntry";
-    private static final String shareFormat = "标题：%s\n摘要：%s\n发布时间：%s\n作者：%s\n正文链接：%s\n来自欣闻客户端";
+    static private final int BRIEF_MIN_LENGTH = 50;
+    static private final String LOG_TAG = "NewsEntry";
+
+    static private final String shareFormat = "标题：%s\n摘要：%s\n发布时间：%s\n作者：%s\n正文链接：%s\n来自欣闻客户端";
+    static private final String subtitleFormat = "来源: %s / %s %s";
 
     @PrimaryKey
     @NonNull
@@ -48,9 +48,6 @@ public class NewsEntry implements Parcelable {
     @ColumnInfo(name = "images")
     String images;
 
-    @ColumnInfo(name = "videos")
-    String videos;
-
     @ColumnInfo(name = "publisher")
     String publisher;
 
@@ -73,9 +70,8 @@ public class NewsEntry implements Parcelable {
         this.publishTime = news.getString("publishTime");
         this.link = news.getString("url");
         this.keywords = news.getJSONArray("keywords").toString();
-        this.images = dataGenerate(news.getString("image"));
-        this.videos = dataGenerate(news.getString("video"));
-        this.publisher = news.getString("publisher") + " "; // TODO: maybe we can remove the space later
+        this.images = toJSONArrayString(news.getString("image"));
+        this.publisher = news.getString("publisher") + " ";
         this.viewed = false;
         this.favorite = false;
     }
@@ -88,7 +84,6 @@ public class NewsEntry implements Parcelable {
         publishTime = in.readString();
         keywords = in.readString();
         images = in.readString();
-        videos = in.readString();
         publisher = in.readString();
         link = in.readString();
         viewed = in.readByte() != 0;
@@ -141,10 +136,6 @@ public class NewsEntry implements Parcelable {
         return images;
     }
 
-    public String getVideos() {
-        return videos;
-    }
-
     public String getPublisher() {
         return publisher;
     }
@@ -180,15 +171,8 @@ public class NewsEntry implements Parcelable {
         return arrayList;
     }
 
-    public String generateSubtitle() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("来源: " );
-        stringBuilder.append(publisher);
-        stringBuilder.append(" / ");
-        stringBuilder.append(category);
-        stringBuilder.append("  ");
-        stringBuilder.append(publishTime);
-        return stringBuilder.toString();
+    public String getSubtitle() {
+        return String.format(subtitleFormat, publisher, category, publishTime);
     }
 
     public boolean hasImage() {
@@ -204,7 +188,7 @@ public class NewsEntry implements Parcelable {
         Log.i(LOG_TAG, "  " + getPublishTime());
     }
 
-    private String dataGenerate(String sources) throws JSONException {
+    private String toJSONArrayString(String sources) throws JSONException {
         if (sources.length() < 3) return "";
         Matcher matcher = Pattern.compile("(.+?)[\\]|,]").matcher(sources.substring(1));
         JSONArray targetJson = new JSONArray();
@@ -227,7 +211,6 @@ public class NewsEntry implements Parcelable {
         dest.writeString(publishTime);
         dest.writeString(keywords);
         dest.writeString(images);
-        dest.writeString(videos);
         dest.writeString(publisher);
         dest.writeString(link);
         dest.writeByte((byte) (viewed ? 1 : 0));
@@ -241,13 +224,5 @@ public class NewsEntry implements Parcelable {
 
     public String getShareContent() {
         return String.format(shareFormat, title, getBriefContent(), publishTime, publisher, link);
-    }
-
-    public boolean isDateValid() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
-        simpleDateFormat.applyPattern("yyyy-MM-dd HH:mm:ss");
-        Date date = new Date();
-        String currentTime = simpleDateFormat.format(date);
-        return publishTime.compareTo(currentTime) < 0;
     }
 }

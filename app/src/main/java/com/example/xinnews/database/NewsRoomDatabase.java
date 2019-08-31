@@ -2,17 +2,13 @@ package com.example.xinnews.database;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
-import com.example.xinnews.Bridge;
 
-import java.util.ArrayList;
-
-@Database(entities = {NewsEntry.class}, version = 1, exportSchema = false)
+@Database(entities = {NewsEntry.class}, version = 2, exportSchema = false)
 public abstract class NewsRoomDatabase extends RoomDatabase {
     public abstract NewsDao newsDao();
     private static NewsRoomDatabase Instance;
@@ -25,7 +21,6 @@ public abstract class NewsRoomDatabase extends RoomDatabase {
         }
     };
 
-    // TODO: determine the migration option
     static public NewsRoomDatabase getDatabase(final Context context) {
         if (Instance == null) {
             synchronized (NewsRoomDatabase.class) {
@@ -33,7 +28,7 @@ public abstract class NewsRoomDatabase extends RoomDatabase {
                     Instance = Room.databaseBuilder(context.getApplicationContext(),
                             NewsRoomDatabase.class, "news_database")
                             .fallbackToDestructiveMigration()
-                            .addCallback(sRoomDatabaseCallback)
+                            .addCallback(sRoomDatabaseCallback) // TODO: remove this line for release
                             .build();
                 }
             }
@@ -52,7 +47,6 @@ public abstract class NewsRoomDatabase extends RoomDatabase {
 
         @Override
         protected Void doInBackground(final Void... params) {
-            // TODO: refresh the news list when start the app
             mDao.deleteAll();
             return null;
         }

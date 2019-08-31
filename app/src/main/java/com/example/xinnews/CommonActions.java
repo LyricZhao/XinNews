@@ -9,15 +9,18 @@ import java.util.ArrayList;
 
 public class CommonActions {
 
-    // TODO: Bug, java.lang.String cannot be cast to java.util.ArrayList
-    public static void share(NewsEntry newsEntry, Context context) {
+    static private final String WECHAT_EXTRA_TEXT = "Kdescription";
+    static private final String SMS_EXTRA_TEXT = "sms_body";
+
+    // TODO: fix the warning of EXTRA_TEXT
+    static void share(NewsEntry newsEntry, Context context) {
         Intent shareIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, newsEntry.getTitle());
         shareIntent.putExtra(Intent.EXTRA_TITLE, newsEntry.getTitle());
         String shareContent = newsEntry.getShareContent();
         shareIntent.putExtra(Intent.EXTRA_TEXT, shareContent);
-        shareIntent.putExtra("sms_body", shareContent);
-        shareIntent.putExtra("Kdescription", shareContent);
+        shareIntent.putExtra(WECHAT_EXTRA_TEXT, shareContent);
+        shareIntent.putExtra(SMS_EXTRA_TEXT, shareContent);
 
         if (newsEntry.hasImage()) {
             ArrayList<Uri> imageUris = Bridge.generateAllImagesUri(newsEntry.getNewsId(), context, newsEntry.getImageCount());
