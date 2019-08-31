@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
@@ -22,6 +23,7 @@ public class NewsPage extends AppCompatActivity {
     private LinearLayout mLinearLayoutForImages;
     private HorizontalScrollView mHorizontalScrollView;
     private boolean favoriteChanged = false;
+    private boolean previousViewed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +31,7 @@ public class NewsPage extends AppCompatActivity {
 
         final Intent intent = getIntent();
         final NewsEntry newsEntry = intent.getParcelableExtra(EXTRA_NEWS_INFO);
+        previousViewed = newsEntry.getViewed();
 
         boolean hasImage = newsEntry.hasImage();
         setContentView(R.layout.news_page);
@@ -56,10 +59,11 @@ public class NewsPage extends AppCompatActivity {
                         mFavoriteButton.setText(R.string.button_cancel_favorite);
                     else
                         mFavoriteButton.setText(R.string.button_favorite);
-                    if (!favoriteChanged) {
+                    if (!favoriteChanged && previousViewed) {
                         favoriteChanged = true;
                         Intent resultIntent = new Intent();
                         resultIntent.putExtra("CHANGED", true);
+                        resultIntent.putExtra("FAVORITE", favorite);
                         setResult(MainActivity.REQUEST_CODE, resultIntent);
                     }
                     break;
@@ -80,6 +84,14 @@ public class NewsPage extends AppCompatActivity {
         }
         BehaviorTracer.pushViewedNews(newsEntry);
 //        BehaviorTracer.printReadingTread();
+
+        if (!previousViewed) {
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("CHANGED", true);
+            resultIntent.putExtra("VIEWED", true);
+            setResult(MainActivity.REQUEST_CODE, resultIntent);
+            CommonActions.view(newsEntry);
+        }
     }
 
     @Override
@@ -131,7 +143,7 @@ public class NewsPage extends AppCompatActivity {
                 imageView.setLayoutParams(layoutParams);
                 imageView.setImageBitmap(bitmap);
                 imageView.setPadding(8, 8, 8, 8);
-                imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+                imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 mLinearLayoutForImages.addView(imageView);
             }
         }

@@ -11,7 +11,7 @@
             android:hint="@string/search_hint"
             android:ems="10"
             android:layout_margin="8dp"
-            android:id="@+id/search_edit_text" android:autofillHints=""/>
+            android:id="@+id/search_edit_text"/>
     <ListView
             android:id="@+id/search_history_list"
             android:layout_width="match_parent"

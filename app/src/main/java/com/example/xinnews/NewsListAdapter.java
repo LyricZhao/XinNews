@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -31,6 +32,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
     private List<NewsEntry> mNews = new ArrayList<>();
     private MainActivity mParent;
     private Bitmap mLogo;
+    private int lastCallPosition;
 
     NewsListAdapter(Context context, MainActivity parentActivity) {
         mContext = context;
@@ -62,6 +64,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         holder.getCardView().setOnClickListener(view -> {
             Intent intent = new Intent(mContext, NewsPage.class);
             intent.putExtra(NewsPage.EXTRA_NEWS_INFO, current);
+            lastCallPosition = position;
             mParent.callNewsPage(intent);
         });
     }
@@ -74,6 +77,16 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
     void setNews(@NonNull List<NewsEntry> news) {
         mNews = news;
         notifyDataSetChanged();
+    }
+
+    void setViewed() {
+        mNews.get(lastCallPosition).changeViewed();
+        notifyDataSetChanged();
+    }
+
+    void setFavorite(boolean favorite) {
+        if (mNews.get(lastCallPosition).getFavorite() != favorite)
+            mNews.get(lastCallPosition).changeFavorite();
     }
 
     void addNewsToEnd(@NonNull List<NewsEntry> news) {
@@ -162,18 +175,23 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         }
 
         void setView(final NewsEntry news) {
+            if (news.getViewed())
+                cardView.setCardBackgroundColor(mContext.getColor(R.color.colorViewed));
+
             cardTitleView.setText(news.getTitle());
             cardCategoryView.setText(news.getCategory());
             cardTimeView.setText(news.getPublishTime());
             if (news.hasImage()) {
                 cardThumbnailView.setVisibility(View.VISIBLE);
-                cardThumbnailView.setImageBitmap(mLogo);
                 try {
                     DownloadTask downloadTask = new DownloadTask();
                     downloadTask.execute(news.getNewsId(), news.getCoverImagePath());
                 } catch (Exception exception) {
                     Log.e(LOG_TAG, exception.toString());
+                    cardThumbnailView.setImageBitmap(mLogo);
                 }
+            } else {
+                cardThumbnailView.setVisibility(View.GONE);
             }
             cardPublisherView.setText(news.getPublisher());
             cardContentView.setText(news.getContent().trim());

@@ -148,6 +148,10 @@ public class NewsEntry implements Parcelable {
         return favorite;
     }
 
+    public boolean getViewed() {
+        return viewed;
+    }
+
     public int getImageCount() {
         try {
             if (!hasImage()) return 0;
@@ -177,6 +181,10 @@ public class NewsEntry implements Parcelable {
 
     public boolean hasImage() {
         return !images.equals("");
+    }
+
+    public void changeViewed() {
+        viewed = true;
     }
 
     public void logInfo() {

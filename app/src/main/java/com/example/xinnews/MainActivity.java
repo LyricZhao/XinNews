@@ -10,11 +10,10 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.InputType;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Menu mNavigationMenu;
 
     private String currentCategory;
+    private String currentKeyword;
     private Handler UIHandler;
     private boolean[] openedCategory = new boolean[Utility.allCategoriesCount];
 
@@ -126,7 +126,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     category = null;
                 if (currentCategory.equals(Utility.recommend))
                     return Bridge.getRecommendNewsEntryArray(Utility.pageSize, 1);
-                assert !currentCategory.equals(Utility.search);
+                if (currentCategory.equals(Utility.search))
+                    return Bridge.getNewsEntryArray(Utility.pageSize, null, currentKeyword, null, 1);
                 assert !currentCategory.equals(Utility.favorite);
                 return Bridge.getNewsEntryArray(Utility.pageSize, Utility.getCurrentDate(), null, category, 1);
             } catch (Exception exception) {
@@ -162,6 +163,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     category = null;
                 if (currentCategory.equals(Utility.recommend))
                     return Bridge.getRecommendNewsEntryArray(Utility.pageSize, mNewsListAdapter.getNextPage());
+                if (currentCategory.equals(Utility.search))
+                    return Bridge.getNewsEntryArray(Utility.pageSize, null, currentKeyword, null, mNewsListAdapter.getNextPage());
                 assert !currentCategory.equals(Utility.favorite);
                 return Bridge.getNewsEntryArray(Utility.pageSize, Utility.getCurrentDate(), null, category, mNewsListAdapter.getNextPage());
             } catch (Exception exception) {
@@ -258,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setRefreshSettings(String category) {
-        mRefreshLayout.setEnableRefresh((!category.equals(Utility.favorite)) && (!category.equals(Utility.search)));
+        mRefreshLayout.setEnableRefresh(!category.equals(Utility.favorite));
         mRefreshLayout.setEnableLoadMore(!category.equals(Utility.favorite));
     }
 
@@ -300,6 +303,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dialog.show();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void callSearchPage() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
@@ -319,11 +323,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         final Dialog searchDialog = builder.create();
         searchDialog.show();
+        searchDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         searchDialog.getWindow().setContentView(view);
         confirmButton.setOnClickListener(v -> {
             String input = editText.getText().toString();
             if (input.length() > 0) {
+                mRefreshLayout.autoRefresh();
                 String keyword = editText.getText().toString();
+                currentCategory = Utility.search;
+                currentKeyword = keyword;
+                setRefreshSettings(currentCategory);
                 new loadSearchNewsFromNetwork().execute(keyword);
                 searchDialog.dismiss();
                 mNavigationMenu.getItem(Utility.searchId).setChecked(true);
@@ -346,8 +355,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             boolean changed = false;
             if (data != null)
                 changed = data.getBooleanExtra("CHANGED", false);
-            if (changed)
-                refreshNewsList(currentCategory);
+            if (changed) {
+                if (data.hasExtra("FAVORITE")) {
+                    if (currentCategory.equals(Utility.favorite))
+                        refreshNewsList(currentCategory);
+                    else
+                        mNewsListAdapter.setFavorite(data.getBooleanExtra("FAVORITE", true));
+                }
+
+                if (data.hasExtra("VIEWED"))
+                    mNewsListAdapter.setViewed();
+            }
         }
     }
 }

@@ -33,9 +33,14 @@ public class CommonActions {
         context.startActivity(shareIntent);
     }
 
-    public static boolean favorite(NewsEntry newsEntry) {
+    static boolean favorite(NewsEntry newsEntry) {
         boolean isFavorite = newsEntry.changeFavorite();
         DbBridge.update(newsEntry);
         return isFavorite;
+    }
+
+    static void view(NewsEntry newsEntry) {
+        newsEntry.changeViewed();
+        DbBridge.update(newsEntry);
     }
 }
