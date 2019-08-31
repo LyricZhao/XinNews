@@ -64,6 +64,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
             Intent intent = new Intent(mContext, NewsPage.class);
             intent.putExtra(NewsPage.EXTRA_NEWS_INFO, current);
             lastCallPosition = position;
+            setViewed();
             mParent.callNewsPage(intent);
         });
     }
@@ -79,8 +80,11 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
     }
 
     void setViewed() {
-        mNews.get(lastCallPosition).changeViewed();
-        notifyDataSetChanged();
+        if (!mNews.get(lastCallPosition).getViewed()) {
+            mNews.get(lastCallPosition).changeViewed();
+            CommonActions.view(mNews.get(lastCallPosition));
+            notifyDataSetChanged();
+        }
     }
 
     void setFavorite(boolean favorite) {
@@ -174,9 +178,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         }
 
         void setView(final NewsEntry news) {
-            if (news.getViewed())
-                cardView.setCardBackgroundColor(mContext.getColor(R.color.colorViewed));
-
+            cardView.setCardBackgroundColor(mContext.getColor(news.getViewed() ? R.color.colorViewed : R.color.colorNotViewed));
             cardTitleView.setText(news.getTitle());
             cardCategoryView.setText(news.getCategory());
             cardTimeView.setText(news.getPublishTime());

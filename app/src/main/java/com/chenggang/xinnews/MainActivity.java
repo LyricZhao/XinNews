@@ -71,6 +71,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mRefreshLayout.setRefreshHeader(new MaterialHeader(this));
         mRefreshLayout.setOnRefreshListener(refreshLayout -> new loadNewsFromNetwork().execute());
         mRefreshLayout.setOnLoadMoreListener(refreshLayout -> new loadMoreNewsFromNetwork().execute());
+        BehaviorTracer.setContent(this);
+        BehaviorTracer.loadSharedPreferences();
     }
 
     /* Policy for loading news:
@@ -286,12 +288,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final boolean[] choices = openedCategory;
         AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
         dialog.setTitle("分类管理");
-        dialog.setMultiChoiceItems(items, choices, new DialogInterface.OnMultiChoiceClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                openedCategory[which] = isChecked;
-            }
-        });
+        dialog.setMultiChoiceItems(items, choices, (dialog1, which, isChecked) -> openedCategory[which] = isChecked);
         dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -360,9 +357,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     else
                         mNewsListAdapter.setFavorite(data.getBooleanExtra("FAVORITE", true));
                 }
-
-                if (data.hasExtra("VIEWED"))
-                    mNewsListAdapter.setViewed();
             }
         }
     }

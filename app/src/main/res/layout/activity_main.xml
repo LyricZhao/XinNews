@@ -28,7 +28,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     android:background="@color/colorNavi"
-                    app:popupTheme="@style/AppTheme.PopupOverlay"/>
+                    app:popupTheme="@style/AppTheme.PopupOverlay"
+                    app:title="@string/toolbar_title"/>
 
         </com.google.android.material.appbar.AppBarLayout>
 

@@ -1,9 +1,12 @@
 package com.chenggang.xinnews;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import com.chenggang.xinnews.database.NewsEntry;
 import org.json.JSONArray;
 
+import java.security.Key;
 import java.util.*;
 
 class BehaviorTracer {
@@ -28,6 +31,7 @@ class BehaviorTracer {
     static private List<Keyword> keywordsHeap = new ArrayList<>();
     static private ArrayList<String> searchHistory = new ArrayList<>();
     static private ArrayList<String> topKeywordsLastTime = new ArrayList<>();
+    static private Context mContent;
 
     static boolean hasViewedNews() {
         return newsViewedCount > 0;
@@ -56,9 +60,33 @@ class BehaviorTracer {
             });
             keywordsHeap = newList.subList(0, Math.min(KEYWORD_LIMIT, newList.size()));
             newsViewedCount ++;
+            saveSharedPreferences();
         } catch (Exception exception) {
             Log.e(LOG_TAG, exception.toString());
         }
+    }
+
+    static void setContent(Context content) {
+        mContent = content;
+    }
+
+    static void loadSharedPreferences() {
+        SharedPreferences keywords = mContent.getSharedPreferences("keywords", Context.MODE_PRIVATE);
+        for (Map.Entry<String, ?> entry: keywords.getAll().entrySet()) {
+            Float v = (Float) entry.getValue();
+            keywordsHeap.add(new Keyword(entry.getKey(), v.doubleValue()));
+        }
+        if (keywordsHeap.size() > 0)
+            newsViewedCount = 1;
+    }
+
+    private static void saveSharedPreferences() {
+        SharedPreferences keywords = mContent.getSharedPreferences("keywords", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = keywords.edit();
+        editor.clear();
+        for (Keyword keyword: keywordsHeap)
+            editor.putFloat(keyword.word, (float) keyword.score);
+        editor.apply();
     }
 
     static ArrayList<String> getTopKeywords() {

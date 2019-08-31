@@ -22,7 +22,6 @@ public class NewsPage extends AppCompatActivity {
     private LinearLayout mLinearLayoutForImages;
     private HorizontalScrollView mHorizontalScrollView;
     private boolean favoriteChanged = false;
-    private boolean previousViewed;
     private Intent resultIntent;
 
     @Override
@@ -31,7 +30,6 @@ public class NewsPage extends AppCompatActivity {
 
         final Intent intent = getIntent();
         final NewsEntry newsEntry = intent.getParcelableExtra(EXTRA_NEWS_INFO);
-        previousViewed = newsEntry.getViewed();
 
         boolean hasImage = newsEntry.hasImage();
         setContentView(R.layout.news_page);
@@ -51,7 +49,7 @@ public class NewsPage extends AppCompatActivity {
         View.OnClickListener clickHandler = view -> {
             switch (view.getId()) {
                 case R.id.news_button_share:
-                    CommonActions.share(newsEntry, getApplicationContext());
+                    CommonActions.share(newsEntry, this);
                     break;
                 case R.id.news_button_favorite:
                     boolean favorite = CommonActions.favorite(newsEntry);
@@ -85,12 +83,6 @@ public class NewsPage extends AppCompatActivity {
 //        BehaviorTracer.printReadingTread();
 
         resultIntent = new Intent();
-        if (!previousViewed) {
-            resultIntent.putExtra("CHANGED", true);
-            resultIntent.putExtra("VIEWED", true);
-            setResult(MainActivity.REQUEST_CODE, resultIntent);
-            CommonActions.view(newsEntry);
-        }
     }
 
     @Override

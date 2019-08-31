@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">欣闻 / XinNews</string>
+    <string name="app_name">赵成钢_News</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_news_page">NewsPage</string>
     <string name="news_title">新闻标题</string>
-    <string name="news_subtitle">来源: ... / 分类 时间</string>
+    <string name="news_subtitle">来源: … / 分类 时间</string>
     <string name="news_content">
         测试文章
         凡本报记者署名文字、图片，版权均属新安晚报所有。任何媒体、网站或个人，未经授权不得转载、链接、转贴或以其他方式复制发表；已授权的媒体、网站，在使用时必须注明 来源：新安晚报或安徽网，违者将依法追究法律责任。\n新安晚报 安徽网 大皖客户端讯 近日，泗县一名初中女生被多人殴打的视频在网上流传。今天晚上，泗县公安局发布警情通报，对此前有媒体报道的小女孩被打是因为被逼卖淫进行了澄清。\n\n\n6月16日，泗县一名初二女生被多名女子殴打。在一段来源不明的视频中，新安晚报、安徽网、大皖客户端记者看到，几名女子对一名小女孩揪住头发、拳打脚踢此前，有媒体报道，几名女子殴打小女孩是为逼迫其卖淫。\n今日21点17分，宿州泗县公安在线官方微博发布关于网传陆某某被殴打、侮辱的警情通报：2019年6月19日14时，陆某某到泗县公安局泗城派出所报警称其被人殴打。泗城派出所遂对周某某等人涉嫌寻衅滋事受案调查。\n经查实，2019年6月15日，受害人陆某某赶到泗县找其朋友张某某玩，并住在泗城镇某宾馆。6月17日凌晨，嫌疑人周某某酒后得知陆某某住在泗城镇某宾馆，即带李某某、陈某某等人租车从泗洪赶到陆某某住地。因个人之间的矛盾纠纷，周某某质问陆某某有关情况，在听到陆某某的否定回答后，周某某、李某某、陈某某三人对陆某某进行殴打、侮辱，随后返回泗洪县。经法医鉴定，陆某某伤情为轻微伤。对于网传陆某某被强迫卖淫一事，经查证无此事实。\n目前，周某某、李某某已到案并分别被依法刑事拘留和行政拘留，公安机关已对陈某某依法传唤。该案正在进一步办理中。\n新安晚报 安徽网 大皖客户端记者
@@ -45,4 +45,5 @@
     <string name="search_cancel_button">取消</string>
     <string name="search_confirm_button">确认</string>
     <string name="no_news">这里还没有新闻</string>
+    <string name="toolbar_title">欣闻 / XinNews</string>
 </resources>
