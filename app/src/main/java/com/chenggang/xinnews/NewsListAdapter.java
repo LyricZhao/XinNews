@@ -1,4 +1,4 @@
-package com.example.xinnews;
+package com.chenggang.xinnews;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -11,12 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.xinnews.database.NewsEntry;
+import com.chenggang.xinnews.database.NewsEntry;
 
 import java.util.ArrayList;
 import java.util.HashMap;

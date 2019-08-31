@@ -1,7 +1,7 @@
-package com.example.xinnews;
+package com.chenggang.xinnews;
 
 import android.util.Log;
-import com.example.xinnews.database.NewsEntry;
+import com.chenggang.xinnews.database.NewsEntry;
 import org.json.JSONArray;
 
 import java.util.*;

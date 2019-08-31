@@ -1,9 +1,9 @@
-package com.example.xinnews;
+package com.chenggang.xinnews;
 
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import com.example.xinnews.database.NewsEntry;
+import com.chenggang.xinnews.database.NewsEntry;
 
 import java.util.ArrayList;
 

@@ -1,10 +1,10 @@
-package com.example.xinnews;
+package com.chenggang.xinnews;
 
 import android.app.Application;
 import android.os.AsyncTask;
-import com.example.xinnews.database.NewsDao;
-import com.example.xinnews.database.NewsEntry;
-import com.example.xinnews.database.NewsRoomDatabase;
+import com.chenggang.xinnews.database.NewsDao;
+import com.chenggang.xinnews.database.NewsEntry;
+import com.chenggang.xinnews.database.NewsRoomDatabase;
 
 import java.util.ArrayList;
 import java.util.List;

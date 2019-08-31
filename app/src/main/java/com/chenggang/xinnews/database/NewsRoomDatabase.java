@@ -1,4 +1,4 @@
-package com.example.xinnews.database;
+package com.chenggang.xinnews.database;
 
 import android.content.Context;
 import android.os.AsyncTask;

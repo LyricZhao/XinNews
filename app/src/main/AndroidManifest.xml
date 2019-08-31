@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
-          package="com.example.xinnews">
+          package="com.chenggang.xinnews">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -16,15 +16,15 @@
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true"
             tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".NewsPage"
+        <activity android:name="com.chenggang.xinnews.NewsPage"
                   android:label="新闻详情"
-                  android:parentActivityName=".MainActivity">
+                  android:parentActivityName="com.chenggang.xinnews.MainActivity">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="com.example.xinnews.MainActivity" />
+                    android:value="com.chenggang.xinnews.MainActivity" />
         </activity>
         <activity
-                android:name=".MainActivity"
+                android:name="com.chenggang.xinnews.MainActivity"
                 android:label="@string/app_name"
                 android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>

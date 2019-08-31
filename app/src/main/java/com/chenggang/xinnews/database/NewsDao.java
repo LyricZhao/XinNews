@@ -1,4 +1,4 @@
-package com.example.xinnews.database;
+package com.chenggang.xinnews.database;
 
 import androidx.room.*;
 

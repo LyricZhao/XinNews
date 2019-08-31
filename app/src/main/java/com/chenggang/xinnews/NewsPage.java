@@ -1,4 +1,4 @@
-package com.example.xinnews;
+package com.chenggang.xinnews;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -11,7 +11,7 @@ import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.core.app.NavUtils;
-import com.example.xinnews.database.NewsEntry;
+import com.chenggang.xinnews.database.NewsEntry;
 
 import java.util.ArrayList;
 

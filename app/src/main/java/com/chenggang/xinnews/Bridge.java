@@ -1,4 +1,4 @@
-package com.example.xinnews;
+package com.chenggang.xinnews;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -6,7 +6,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
 import androidx.core.content.FileProvider;
-import com.example.xinnews.database.NewsEntry;
+import com.chenggang.xinnews.database.NewsEntry;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
