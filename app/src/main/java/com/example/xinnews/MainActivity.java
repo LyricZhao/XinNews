@@ -1,5 +1,6 @@
 package com.example.xinnews;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -29,31 +30,23 @@ import com.example.xinnews.database.NewsEntry;
 import com.google.android.material.navigation.NavigationView;
 import com.scwang.smartrefresh.header.MaterialHeader;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
-import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
-import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: recommend news twice
-
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    static private final String LOG_TAG = "MainActivity";
+    static final int REQUEST_CODE = 701;
+
     private RecyclerView mRecyclerView;
-    private final static String LOG_TAG = "MainActivity";
-    private String currentCategory = null;
+    private RefreshLayout mRefreshLayout;
     private NewsListAdapter mNewsListAdapter;
-    public static final int REQUEST_CODE = 701;
+    private NavigationView mNavigationView;
+    private Menu mNavigationMenu;
+
+    private String currentCategory;
     private Handler UIHandler;
-    RefreshLayout mRefreshLayout;
-
-    NavigationView navigationView;
-    Menu navigationMenu;
-    boolean[] openedCategory = new boolean[Utility.allCategoriesCount];
-
-    @Override
-    public Context getApplicationContext() {
-        return super.getApplicationContext();
-    }
+    private boolean[] openedCategory = new boolean[Utility.allCategoriesCount];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,9 +55,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        navigationMenu = navigationView.getMenu();
+        mNavigationView = findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
+        mNavigationMenu = mNavigationView.getMenu();
         loadCategoryPreferences();
 
         mRecyclerView = findViewById(R.id.recyclerview);
@@ -73,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         UIHandler = new Handler();
 
-        Bridge.setSystemCacheDir(getApplicationContext().getCacheDir());
+        Bridge.setSystemCacheDir(getCacheDir());
         DbBridge.init(getApplication());
         refreshNewsList(Utility.homePage);
 
@@ -81,30 +74,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mRefreshLayout.setEnableRefresh(true);
         mRefreshLayout.setEnableLoadMore(true);
         mRefreshLayout.setRefreshHeader(new MaterialHeader(this));
-        mRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
-            @Override
-            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-                new loadNewsFromNetwork().execute();
-            }
-        });
-        mRefreshLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
-            @Override
-            public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
-                new loadMoreNewsFromNetwork().execute();
-            }
-        });
+        mRefreshLayout.setOnRefreshListener(refreshLayout -> new loadNewsFromNetwork().execute());
+        mRefreshLayout.setOnLoadMoreListener(refreshLayout -> new loadMoreNewsFromNetwork().execute());
     }
 
     /* Policy for loading news:
-     *    async_task_1: load from db
-     *    async_task_2: load from network
-     *    async_task_2: save downloaded news to db
+     *    Step 1: load from db
+     *    Step 2.1: load from network
+     *    Step 3.1: save downloaded news to db
      */
     private void refreshNewsList(String category) {
         currentCategory = category;
         new loadNewsFromDb().execute();
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class loadNewsFromDb extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -116,22 +100,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected void onPostExecute(Void result) {
-            new loadNewsFromNetwork().execute();
+            if (!currentCategory.equals(Utility.favorite))
+                new loadNewsFromNetwork().execute();
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class loadNewsFromNetwork extends AsyncTask<Void, Void, ArrayList<NewsEntry>> {
 
+        @Override
+        protected void onPreExecute() {
+            UIHandler.post(() -> { mRefreshLayout.autoRefresh(); });
+        }
+
+        @SuppressLint("Assert")
         @Override
         protected ArrayList<NewsEntry> doInBackground(Void... params) {
             try {
                 String category = currentCategory;
                 if (currentCategory.equals(Utility.homePage))
                     category = null;
-                if (currentCategory.equals(Utility.favorite))
-                    return null;
                 if (currentCategory.equals(Utility.recommend))
                     return Bridge.getRecommendNewsEntryArray(Utility.pageSize, 1);
+                assert !currentCategory.equals(Utility.search);
+                assert !currentCategory.equals(Utility.favorite);
                 return Bridge.getNewsEntryArray(Utility.pageSize, Utility.getCurrentDate(), null, category, 1);
             } catch (Exception exception) {
                 Log.e(LOG_TAG, exception.toString());
@@ -145,25 +137,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 mNewsListAdapter.addNewsToFront(result);
                 mRefreshLayout.finishRefresh();
             });
-            if (result == null)
-                return;
             for (NewsEntry newsEntry: result)
                 DbBridge.insert(newsEntry);
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class loadMoreNewsFromNetwork extends AsyncTask<Void, Void, ArrayList<NewsEntry>> {
 
+        @SuppressLint("Assert")
         @Override
         protected ArrayList<NewsEntry> doInBackground(Void... params) {
             try {
                 String category = currentCategory;
                 if (currentCategory.equals(Utility.homePage))
                     category = null;
-                if (currentCategory.equals(Utility.favorite))
-                    return null;
                 if (currentCategory.equals(Utility.recommend))
                     return Bridge.getRecommendNewsEntryArray(Utility.pageSize, mNewsListAdapter.getNextPage());
+                assert !currentCategory.equals(Utility.favorite);
                 return Bridge.getNewsEntryArray(Utility.pageSize, Utility.getCurrentDate(), null, category, mNewsListAdapter.getNextPage());
             } catch (Exception exception) {
                 Log.e(LOG_TAG, exception.toString());
@@ -177,20 +168,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 mNewsListAdapter.addNewsToEnd(result);
                 mRefreshLayout.finishLoadMore();
             });
-            if (result == null)
-                return;
             for (NewsEntry newsEntry: result)
                 DbBridge.insert(newsEntry);
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class loadSearchNewsFromNetwork extends AsyncTask<String, Void, ArrayList<NewsEntry>> {
 
         @Override
         protected ArrayList<NewsEntry> doInBackground(String... params) {
             try {
                 String keyword = params[0];
-                return Bridge.getNewsEntryArray(30, null, keyword, null, 1);
+                return Bridge.getNewsEntryArray(Utility.pageSize, null, keyword, null, 1);
             } catch (Exception exception) {
                 Log.e(LOG_TAG, exception.toString());
             }
@@ -199,8 +189,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected void onPostExecute(ArrayList<NewsEntry> result) {
-            if (result == null)
-                return;
             UIHandler.post(() -> mNewsListAdapter.setNews(result));
             for (NewsEntry newsEntry: result)
                 DbBridge.insert(newsEntry);
@@ -221,9 +209,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             for (int i = 0; i < Utility.allCategoriesCount; ++ i)
                 openedCategory[i] = categories.getBoolean(Utility.categories[i], true);
         }
-        navigationMenu.getItem(0).setChecked(true);
+        mNavigationMenu.getItem(0).setChecked(true);
         for (int i = 0; i < Utility.allCategoriesCount; ++ i)
-            navigationMenu.getItem(i + Utility.navigationOffset).setVisible(openedCategory[i]);
+            mNavigationMenu.getItem(i + Utility.navigationOffset).setVisible(openedCategory[i]);
     }
 
     private void saveCategoryPreferences() {
@@ -234,30 +222,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             editor.putBoolean(Utility.categories[i], openedCategory[i]);
         editor.apply();
         for (int i = 0; i < Utility.allCategoriesCount; ++ i)
-            navigationMenu.getItem(i + Utility.navigationOffset).setVisible(openedCategory[i]);
+            mNavigationMenu.getItem(i + Utility.navigationOffset).setVisible(openedCategory[i]);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.main_toolbar, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == R.id.main_search_button) {
             callSearchPage();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setRefreshSettings(String category) {
+        mRefreshLayout.setEnableRefresh((!category.equals(Utility.favorite)) && (!category.equals(Utility.search)));
+        mRefreshLayout.setEnableLoadMore(!category.equals(Utility.favorite));
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         String title = item.getTitle().toString();
+        setRefreshSettings(title);
         if (title.equals(Utility.categorySettings)) {
             showCategorySectionDialog();
             return false;
@@ -274,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void showCategorySectionDialog() {
         final String[] items = Utility.categories;
-        final boolean choices[] = openedCategory;
+        final boolean[] choices = openedCategory;
         AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
         dialog.setTitle("分类管理");
         dialog.setMultiChoiceItems(items, choices, new DialogInterface.OnMultiChoiceClickListener() {
@@ -292,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dialog.show();
     }
 
-    void callSearchPage() {
+    private void callSearchPage() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
         View view = inflater.inflate(R.layout.search_dialog, null);
@@ -312,27 +304,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final Dialog searchDialog = builder.create();
         searchDialog.show();
         searchDialog.getWindow().setContentView(view);
-        confirmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String input = editText.getText().toString();
-                if (input.length() > 0) {
-                    String keyword = editText.getText().toString();
-                    new loadSearchNewsFromNetwork().execute(keyword);
-                    searchDialog.dismiss();
-                    navigationMenu.getItem(Utility.searchId).setChecked(true);
-                    DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
-                    drawerLayout.closeDrawer(GravityCompat.START);
-                    BehaviorTracer.addSearchHistory(keyword);
-                }
-            }
-        });
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        confirmButton.setOnClickListener(v -> {
+            String input = editText.getText().toString();
+            if (input.length() > 0) {
+                String keyword = editText.getText().toString();
+                new loadSearchNewsFromNetwork().execute(keyword);
                 searchDialog.dismiss();
+                mNavigationMenu.getItem(Utility.searchId).setChecked(true);
+                DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+                drawerLayout.closeDrawer(GravityCompat.START);
+                BehaviorTracer.addSearchHistory(keyword);
             }
         });
+        cancelButton.setOnClickListener(v -> searchDialog.dismiss());
     }
 
     void callNewsPage(Intent intent) {

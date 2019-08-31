@@ -43,7 +43,7 @@
             android:fitsSystemWindows="true"
             android:id="@+id/nav_view"
             app:headerLayout="@layout/side_nav"
-            app:menu="@menu/main_drawer"
+            app:menu="@menu/nav_drawer"
     />
 
 </androidx.drawerlayout.widget.DrawerLayout>
