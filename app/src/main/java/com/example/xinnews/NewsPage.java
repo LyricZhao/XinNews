@@ -31,8 +31,7 @@ public class NewsPage extends AppCompatActivity {
         final NewsEntry newsEntry = intent.getParcelableExtra(EXTRA_NEWS_INFO);
 
         boolean hasImage = newsEntry.hasImage();
-        if (hasImage) setContentView(R.layout.news_pages_with_image);
-        else setContentView(R.layout.news_pages_without_image);
+        setContentView(R.layout.news_page);
 
         TextView mTitleTextView = findViewById(R.id.news_title);
         TextView mSubtitleTextView = findViewById(R.id.news_subtitle);

@@ -23,9 +23,8 @@ import java.util.List;
 
 
 public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsViewHolder> {
-    static private final int WITH_IMAGE = 0;
-    static private final int WITHOUT_IMAGE = 1;
-    static private final int EMPTY_VIEW = 2;
+    static private final int NORMAL_NEWS = 0;
+    static private final int EMPTY_VIEW = 1;
 
     private Context mContext;
     private final LayoutInflater mInflater;
@@ -44,10 +43,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
     @Override
     public NewsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView;
-        if (viewType == WITH_IMAGE) {
+        if (viewType == NORMAL_NEWS) {
             itemView = mInflater.inflate(R.layout.news_card, parent, false);
-        } else if (viewType == WITHOUT_IMAGE){
-            itemView = mInflater.inflate(R.layout.news_card_without_image, parent, false);
         } else {
             itemView = mInflater.inflate(R.layout.no_data, parent, false);
         }
@@ -71,9 +68,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
 
     @Override
     public int getItemViewType(int position) {
-        if (mNews.size() == 0)
-            return EMPTY_VIEW;
-        return mNews.get(position).hasImage() ? WITH_IMAGE : WITHOUT_IMAGE;
+        return mNews.size() == 0 ? EMPTY_VIEW : NORMAL_NEWS;
     }
 
     void setNews(@NonNull List<NewsEntry> news) {
@@ -171,6 +166,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
             cardCategoryView.setText(news.getCategory());
             cardTimeView.setText(news.getPublishTime());
             if (news.hasImage()) {
+                cardThumbnailView.setVisibility(View.VISIBLE);
                 cardThumbnailView.setImageBitmap(mLogo);
                 try {
                     DownloadTask downloadTask = new DownloadTask();
