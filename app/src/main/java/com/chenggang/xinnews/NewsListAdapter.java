@@ -52,7 +52,6 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         return new NewsViewHolder(itemView);
     }
 
-    // TODO: empty news
     @Override
     public void onBindViewHolder(NewsViewHolder holder, int position) {
         if (mNews.size() == 0)

@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-// TODO: limit the cache size
 class PicsCache {
     static private HashMap<String, Bitmap> hashMap = new HashMap<>();
     static private final String LOG_TAG = "PicsCache";
