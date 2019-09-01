@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.ShareActionProvider;
 import androidx.core.content.FileProvider;
 import com.chenggang.xinnews.database.NewsEntry;
 import org.json.JSONArray;
@@ -41,13 +42,15 @@ public class Bridge {
         return result.toString();
     }
 
+    static Uri generateImageUri(String newsId, Context context, int id) {
+        File imageFile = new File(systemCacheDir, Utility.tagger(newsId, id));
+        return FileProvider.getUriForFile(context, PROVIDER_AUTHORITY, imageFile);
+    }
+
     static ArrayList<Uri> generateAllImagesUri(String newsId, Context context, int count) {
         ArrayList<Uri> imageUris = new ArrayList<>();
-        for (int i = 0; i < count; ++ i) {
-            File imageFile = new File(systemCacheDir, Utility.tagger(newsId, i));
-            Uri imageUri = FileProvider.getUriForFile(context, PROVIDER_AUTHORITY, imageFile);
-            imageUris.add(imageUri);
-        }
+        for (int i = 0; i < count; ++ i)
+            imageUris.add(generateImageUri(newsId, context, i));
         return imageUris;
     }
 
