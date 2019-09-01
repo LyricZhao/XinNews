@@ -27,15 +27,14 @@ import com.scwang.smartrefresh.layout.api.RefreshLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     static private final String LOG_TAG = "MainActivity";
     static final int REQUEST_CODE = 701;
 
-    private RecyclerView mRecyclerView;
     private RefreshLayout mRefreshLayout;
     private NewsListAdapter mNewsListAdapter;
-    private NavigationView mNavigationView;
     private Menu mNavigationMenu;
 
     private String currentCategory;
@@ -50,12 +49,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mNavigationView = findViewById(R.id.nav_view);
+        NavigationView mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
         mNavigationMenu = mNavigationView.getMenu();
         loadCategoryPreferences();
 
-        mRecyclerView = findViewById(R.id.recyclerview);
+        RecyclerView mRecyclerView = findViewById(R.id.recyclerview);
         mNewsListAdapter = new NewsListAdapter(this, this);
         mRecyclerView.setAdapter(mNewsListAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -308,17 +307,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final ListView listView = view.findViewById(R.id.search_history_list);
         final EditText editText = view.findViewById(R.id.search_edit_text);
 
-        ArrayList<String> history = BehaviorTracer.getSearchHistory();
-        if (history.size() == 0) {
-            history = new ArrayList<>();
-            history.add("无历史记录");
-        }
+        final ArrayList<String> history = BehaviorTracer.getSearchHistory();
         ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, history);
         listView.setAdapter(adapter);
+        if (BehaviorTracer.haveHistory()) {
+            listView.setOnItemClickListener((parent, view1, position, id) -> {
+                editText.setText(history.get(position));
+            });
+        }
 
         final Dialog searchDialog = builder.create();
         searchDialog.show();
-        searchDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        Objects.requireNonNull(searchDialog.getWindow()).clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         searchDialog.getWindow().setContentView(view);
         confirmButton.setOnClickListener(v -> {
             String input = editText.getText().toString();

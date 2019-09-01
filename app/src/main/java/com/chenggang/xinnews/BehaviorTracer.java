@@ -120,7 +120,16 @@ class BehaviorTracer {
         searchHistory.add(0, keyword);
     }
 
+    static boolean haveHistory() {
+        return searchHistory.size() > 0;
+    }
+
     static ArrayList<String> getSearchHistory() {
+        if (searchHistory.size() == 0) {
+            ArrayList<String> history = new ArrayList<>();
+            history.add("无历史记录");
+            return history;
+        }
         return searchHistory;
     }
 }
