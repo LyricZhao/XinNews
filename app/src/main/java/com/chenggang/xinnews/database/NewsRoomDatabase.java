@@ -28,7 +28,7 @@ public abstract class NewsRoomDatabase extends RoomDatabase {
                     Instance = Room.databaseBuilder(context.getApplicationContext(),
                             NewsRoomDatabase.class, "news_database")
                             .fallbackToDestructiveMigration()
-//                            .addCallback(sRoomDatabaseCallback) // remove this line for release
+                            .addCallback(sRoomDatabaseCallback) // remove this line for release
                             .build();
                 }
             }

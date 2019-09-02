@@ -1,12 +1,12 @@
 package com.chenggang.xinnews;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 import com.chenggang.xinnews.database.NewsEntry;
 import org.json.JSONArray;
 
-import java.security.Key;
 import java.util.*;
 
 class BehaviorTracer {
@@ -31,6 +31,7 @@ class BehaviorTracer {
     static private List<Keyword> keywordsHeap = new ArrayList<>();
     static private ArrayList<String> searchHistory = new ArrayList<>();
     static private ArrayList<String> topKeywordsLastTime = new ArrayList<>();
+    @SuppressLint("StaticFieldLeak")
     static private Context mContent;
 
     static boolean hasViewedNews() {
@@ -113,7 +114,7 @@ class BehaviorTracer {
 
     static void printReadingTread() {
         for (Keyword keyword: keywordsHeap)
-            Log.d(LOG_TAG, keyword.word + ": " + String.valueOf(keyword.score));
+            Log.d(LOG_TAG, keyword.word + ": " + keyword.score);
     }
 
     static void addSearchHistory(String keyword) {

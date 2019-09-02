@@ -53,7 +53,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
     }
 
     @Override
-    public void onBindViewHolder(NewsViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
         if (mNews.size() == 0)
             return;
         final NewsEntry current = mNews.get(position);
@@ -78,7 +78,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.NewsVi
         notifyDataSetChanged();
     }
 
-    void setViewed() {
+    private void setViewed() {
         if (!mNews.get(lastCallPosition).getViewed()) {
             mNews.get(lastCallPosition).changeViewed();
             CommonActions.view(mNews.get(lastCallPosition));

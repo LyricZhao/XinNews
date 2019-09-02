@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -84,10 +83,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         new loadNewsFromDb().execute();
     }
 
-    private void postErrorAndFinishRefresh() {
+    private void postErrorAndFinishRefreshAndLoadMore() {
         UIHandler.post(() -> {
             Toast.makeText(MainActivity.this, "网络或文件系统错误", Toast.LENGTH_SHORT).show();
             mRefreshLayout.finishRefresh();
+            mRefreshLayout.finishLoadMore();
         });
     }
 
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected void onPreExecute() {
-            UIHandler.post(() -> { mRefreshLayout.autoRefresh(); });
+            UIHandler.post(() -> mRefreshLayout.autoRefresh());
         }
 
         @SuppressLint("Assert")
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (currentCategory.equals(Utility.homePage))
                     category = null;
                 if (currentCategory.equals(Utility.recommend))
-                    return Bridge.getRecommendNewsEntryArray(Utility.pageSize, 1);
+                    return Bridge.getRecommendNewsEntryArray(1);
                 if (currentCategory.equals(Utility.search))
                     return Bridge.getNewsEntryArray(Utility.pageSize, null, currentKeyword, null, 1);
                 assert !currentCategory.equals(Utility.favorite);
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         protected void onPostExecute(ArrayList<NewsEntry> result) {
             if (result == null) {
-                postErrorAndFinishRefresh();
+                postErrorAndFinishRefreshAndLoadMore();
                 return;
             }
             UIHandler.post(() -> {
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (currentCategory.equals(Utility.homePage))
                     category = null;
                 if (currentCategory.equals(Utility.recommend))
-                    return Bridge.getRecommendNewsEntryArray(Utility.pageSize, mNewsListAdapter.getNextPage());
+                    return Bridge.getRecommendNewsEntryArray(mNewsListAdapter.getNextPage());
                 if (currentCategory.equals(Utility.search))
                     return Bridge.getNewsEntryArray(Utility.pageSize, null, currentKeyword, null, mNewsListAdapter.getNextPage());
                 assert !currentCategory.equals(Utility.favorite);
@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         protected void onPostExecute(ArrayList<NewsEntry> result) {
             if (result == null) {
-                postErrorAndFinishRefresh();
+                postErrorAndFinishRefreshAndLoadMore();
                 return;
             }
             UIHandler.post(() -> {
@@ -204,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         protected void onPostExecute(ArrayList<NewsEntry> result) {
             if (result == null) {
-                postErrorAndFinishRefresh();
+                postErrorAndFinishRefreshAndLoadMore();
                 return;
             }
             UIHandler.post(() -> mNewsListAdapter.setNews(result));
@@ -288,12 +288,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
         dialog.setTitle("分类管理");
         dialog.setMultiChoiceItems(items, choices, (dialog1, which, isChecked) -> openedCategory[which] = isChecked);
-        dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                saveCategoryPreferences();
-            }
-        });
+        dialog.setPositiveButton("OK", (dialog12, which) -> saveCategoryPreferences());
         dialog.show();
     }
 
@@ -301,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void callSearchPage() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
-        View view = inflater.inflate(R.layout.search_dialog, null);
+        @SuppressLint("InflateParams") View view = inflater.inflate(R.layout.search_dialog, null);
         final Button confirmButton = view.findViewById(R.id.search_confirm_button);
         final Button cancelButton = view.findViewById(R.id.search_cancel_button);
         final ListView listView = view.findViewById(R.id.search_history_list);
@@ -311,9 +306,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, history);
         listView.setAdapter(adapter);
         if (BehaviorTracer.haveHistory()) {
-            listView.setOnItemClickListener((parent, view1, position, id) -> {
-                editText.setText(history.get(position));
-            });
+            listView.setOnItemClickListener((parent, view1, position, id) -> editText.setText(history.get(position)));
         }
 
         final Dialog searchDialog = builder.create();

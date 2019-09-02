@@ -7,7 +7,7 @@ import com.chenggang.xinnews.database.NewsEntry;
 
 import java.util.ArrayList;
 
-public class CommonActions {
+class CommonActions {
 
     static private final String WECHAT_EXTRA_TEXT = "Kdescription";
     static private final String SMS_EXTRA_TEXT = "sms_body";

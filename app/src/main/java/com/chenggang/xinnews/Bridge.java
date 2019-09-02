@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
-import android.widget.ShareActionProvider;
 import androidx.core.content.FileProvider;
 import com.chenggang.xinnews.database.NewsEntry;
 import org.json.JSONArray;
@@ -16,12 +15,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 
-public class Bridge {
+class Bridge {
     static private final String LOG_TAG = "Bridge";
     static private final String BASE_URL = "https://api2.newsminer.net/svc/news/queryNewsList";
     static private final String ENCODING = "UTF-8";
     static private final String PROVIDER_AUTHORITY = BuildConfig.APPLICATION_ID + ".provider";
-    static private final int TIME_OUT = 2500;
+    static private final int TIME_OUT = 1000;
 
     static private File systemCacheDir = null;
 
@@ -32,8 +31,8 @@ public class Bridge {
     static private String getUrlContent(String urlAddress) throws Exception {
         URL url = new URL(urlAddress);
         URLConnection connection = url.openConnection();
-        connection.setConnectTimeout(TIME_OUT);
         connection.setReadTimeout(TIME_OUT);
+        connection.setConnectTimeout(TIME_OUT);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), ENCODING));
         String incoming;
         StringBuilder result = new StringBuilder();
@@ -42,7 +41,7 @@ public class Bridge {
         return result.toString();
     }
 
-    static Uri generateImageUri(String newsId, Context context, int id) {
+    static private Uri generateImageUri(String newsId, Context context, int id) {
         File imageFile = new File(systemCacheDir, Utility.tagger(newsId, id));
         return FileProvider.getUriForFile(context, PROVIDER_AUTHORITY, imageFile);
     }
@@ -54,9 +53,9 @@ public class Bridge {
         return imageUris;
     }
 
-    static ArrayList<NewsEntry> getRecommendNewsEntryArray(int size, int page) throws Exception {
+    static ArrayList<NewsEntry> getRecommendNewsEntryArray(int page) throws Exception {
         if (!BehaviorTracer.hasViewedNews() || (BehaviorTracer.getNewsViewedCountLastTime() == 0 && page > 1))
-            return getNewsEntryArray(size, Utility.getCurrentDate(), null, null, page);
+            return getNewsEntryArray(Utility.pageSize, Utility.getCurrentDate(), null, null, page);
 
         ArrayList<NewsEntry> recommendNews = new ArrayList<>();
         ArrayList<String> topKeywords;
@@ -65,7 +64,7 @@ public class Bridge {
         else
             topKeywords = BehaviorTracer.getTopKeywordsLastTime();
         for (String keyword: topKeywords)
-            recommendNews.addAll(getNewsEntryArray(size / BehaviorTracer.KEYWORD_TOTAL, Utility.getCurrentDate(), keyword, null, page));
+            recommendNews.addAll(getNewsEntryArray(Utility.pageSize / BehaviorTracer.KEYWORD_TOTAL, Utility.getCurrentDate(), keyword, null, page));
         return recommendNews;
     }
 
@@ -76,20 +75,16 @@ public class Bridge {
 
     static private void saveToInternalStorage(File dir, String newsImageId, Bitmap bitmap) throws FileNotFoundException {
         File imagePath = new File(dir, newsImageId);
-        FileOutputStream fileOutputStream = null;
-        fileOutputStream = new FileOutputStream(imagePath);
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, new FileOutputStream(imagePath));
     }
 
     static private Bitmap loadImageFromStorage(File dir, String newsImageId) throws FileNotFoundException {
-        Bitmap bitmap = null;
         File imagePath = new File(dir, newsImageId);
-        bitmap = BitmapFactory.decodeStream(new FileInputStream(imagePath));
-        return bitmap;
+        return BitmapFactory.decodeStream(new FileInputStream(imagePath));
     }
 
     static Bitmap loadResourceFromPath(String newsImageId, String webPath) throws Exception {
-        Bitmap bitmap = null;
+        Bitmap bitmap;
         try {
             bitmap = loadImageFromStorage(systemCacheDir, newsImageId);
         } catch (FileNotFoundException exception) {
