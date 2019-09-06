@@ -35,11 +35,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private RefreshLayout mRefreshLayout;
     private NewsListAdapter mNewsListAdapter;
     private Menu mNavigationMenu;
+    private RecyclerView mRecyclerView;
 
     private String currentCategory;
     private String currentKeyword;
     private Handler UIHandler;
     private boolean[] openedCategory = new boolean[Utility.allCategoriesCount];
+    private boolean isLoading = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mNavigationMenu = mNavigationView.getMenu();
         loadCategoryPreferences();
 
-        RecyclerView mRecyclerView = findViewById(R.id.recyclerview);
+        mRecyclerView = findViewById(R.id.recyclerview);
         mNewsListAdapter = new NewsListAdapter(this, this);
         mRecyclerView.setAdapter(mNewsListAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -67,8 +69,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mRefreshLayout.setEnableRefresh(true);
         mRefreshLayout.setEnableLoadMore(true);
         mRefreshLayout.setRefreshHeader(new MaterialHeader(this));
-        mRefreshLayout.setOnRefreshListener(refreshLayout -> new loadNewsFromNetwork().execute());
-        mRefreshLayout.setOnLoadMoreListener(refreshLayout -> new loadMoreNewsFromNetwork().execute());
+        mRefreshLayout.setOnRefreshListener(refreshLayout -> {
+            isLoading = true;
+            new loadNewsFromNetwork().execute();
+        });
+        mRefreshLayout.setOnLoadMoreListener(refreshLayout -> {
+            isLoading = true;
+            new loadMoreNewsFromNetwork().execute();
+        });
         BehaviorTracer.setContent(this);
         BehaviorTracer.loadSharedPreferences();
     }
@@ -86,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void postErrorAndFinishRefreshAndLoadMore() {
         UIHandler.post(() -> {
             Toast.makeText(MainActivity.this, "网络或文件系统错误", Toast.LENGTH_SHORT).show();
+            isLoading = false;
             mRefreshLayout.finishRefresh();
             mRefreshLayout.finishLoadMore();
         });
@@ -97,7 +106,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         protected Void doInBackground(Void... params) {
             List<NewsEntry> news = DbBridge.getNews(currentCategory);
-            UIHandler.post(() -> mNewsListAdapter.setNews(news));
+            UIHandler.post(() -> {
+                mNewsListAdapter.setNews(news);
+                mRecyclerView.scrollToPosition(0);
+            });
             return null;
         }
 
@@ -113,7 +125,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected void onPreExecute() {
-            UIHandler.post(() -> mRefreshLayout.autoRefresh());
+            if (!isLoading)
+                UIHandler.post(() -> mRefreshLayout.autoRefresh());
         }
 
         @SuppressLint("Assert")
@@ -143,7 +156,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             UIHandler.post(() -> {
                 mNewsListAdapter.addNewsToFront(result);
+                isLoading = false;
                 mRefreshLayout.finishRefresh();
+                mRecyclerView.scrollToPosition(0);
             });
             for (NewsEntry newsEntry: result)
                 DbBridge.insert(newsEntry);
@@ -180,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             UIHandler.post(() -> {
                 mNewsListAdapter.addNewsToEnd(result);
+                isLoading = false;
                 mRefreshLayout.finishLoadMore();
             });
             for (NewsEntry newsEntry: result)
@@ -207,7 +223,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 postErrorAndFinishRefreshAndLoadMore();
                 return;
             }
-            UIHandler.post(() -> mNewsListAdapter.setNews(result));
+            UIHandler.post(() -> {
+                mNewsListAdapter.setNews(result);
+                mRecyclerView.scrollToPosition(0);
+            });
             for (NewsEntry newsEntry: result)
                 DbBridge.insert(newsEntry);
         }
@@ -267,6 +286,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         String title = item.getTitle().toString();
+        if (isLoading) return false;
+
         setRefreshSettings(title);
         if (title.equals(Utility.categorySettings)) {
             showCategorySectionDialog();
@@ -316,6 +337,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         confirmButton.setOnClickListener(v -> {
             String input = editText.getText().toString();
             if (input.length() > 0) {
+                isLoading = true;
                 mRefreshLayout.autoRefresh();
                 String keyword = editText.getText().toString();
                 currentCategory = Utility.search;
